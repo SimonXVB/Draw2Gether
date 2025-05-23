@@ -1,4 +1,4 @@
-import { useContext, useRef } from "react";
+import { useContext } from "react";
 import { useRenderCanvas } from "./useRenderCanvas";
 import { coordsCTX } from "../Context/CoordsContext/coordsCTX";
 
@@ -6,27 +6,27 @@ export function usePanCanvas() {
     const { render } = useRenderCanvas();
     const coordsContext = useContext(coordsCTX);
 
-    const prevX = useRef<number>(0);
-    const prevY = useRef<number>(0);
+    let prevX = 0;
+    let prevY = 0;
 
     function mousePanCanvas(e: MouseEvent, canvas: HTMLCanvasElement) {
-        coordsContext.x += e.clientX - prevX.current;
-        coordsContext.y += e.clientY - prevY.current;
+        coordsContext.x += e.clientX - prevX;
+        coordsContext.y += e.clientY - prevY;
 
         render(canvas);
 
-        prevX.current = e.clientX;
-        prevY.current = e.clientY;
+        prevX = e.clientX;
+        prevY = e.clientY;
     };
 
     function touchPanCanvas(e: TouchEvent, canvas: HTMLCanvasElement) {
-        coordsContext.x += e.touches[0].clientX - prevX.current;
-        coordsContext.y += e.touches[0].clientY - prevY.current;
+        coordsContext.x += e.touches[0].clientX - prevX;
+        coordsContext.y += e.touches[0].clientY - prevY;
 
         render(canvas);
 
-        prevX.current = e.touches[0].clientX;
-        prevY.current = e.touches[0].clientY;
+        prevX = e.touches[0].clientX;
+        prevY = e.touches[0].clientY;
     };
 
     function addPanListeners(canvas: HTMLCanvasElement) {
@@ -34,10 +34,10 @@ export function usePanCanvas() {
 
         // Mouse Event Listeners
         canvas.addEventListener("mousedown", e => {
-            prevX.current = e.clientX;
-            prevY.current = e.clientY;
-
             if(e.button === 1) {
+                prevX = e.clientX;
+                prevY = e.clientY;
+                
                 isDown = true;
             };
         });
@@ -55,10 +55,10 @@ export function usePanCanvas() {
 
         //Touch Event Listeners
         canvas.addEventListener("touchstart", e => {
-            prevX.current = e.touches[0].clientX;
-            prevY.current = e.touches[0].clientY;
-
             if(e.touches.length === 2) {
+                prevX = e.touches[0].clientX;
+                prevY = e.touches[0].clientY;
+
                 isDown = true;
             };
         });

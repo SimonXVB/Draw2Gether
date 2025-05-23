@@ -10,7 +10,7 @@ export function useZoomCanvas() {
         if(e.deltaY > 0 && coordsContext.scale > 0.1) {
             coordsContext.scale -= 0.05;
         } else if(e.deltaY < 0) {
-            coordsContext.scale += 0.05
+            coordsContext.scale += 0.05;
         };
 
         render(canvas);

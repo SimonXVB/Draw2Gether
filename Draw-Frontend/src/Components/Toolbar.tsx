@@ -1,7 +1,7 @@
 import { useContext } from "react"
 import { selectionCTX } from "../Context/SelectionContext/selectionCTX"
 
-export function SelectionUI() {
+export function Toolbar() {
     const { setCurrentSelection, currentSelection } = useContext(selectionCTX);
 
     function setColor(e: React.ChangeEvent<HTMLInputElement>) {
