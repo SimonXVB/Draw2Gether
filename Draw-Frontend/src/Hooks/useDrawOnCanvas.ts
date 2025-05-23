@@ -6,7 +6,7 @@ import { drawingCTX, type drawingInterface } from "../Context/DrawingContext/dra
 export function useDrawOnCanvas() {
     const { currentSelection } = useContext(selectionCTX);
     const { scale, x, y } = useContext(coordsCTX);
-    const drawingInfo = useContext(drawingCTX);
+    const { drawingInfo } = useContext(drawingCTX);
 
     const currentDrawingInfo: drawingInterface = {
         color: currentSelection.color,

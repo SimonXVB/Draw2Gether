@@ -11,4 +11,9 @@ export interface drawingInterface {
     coords: drawingCoords[]
 };
 
-export const drawingCTX = createContext<drawingInterface[]>([]);
+interface drawingCTXInterface {
+    drawingInfo: drawingInterface[],
+    redoArr: drawingInterface[]
+};
+
+export const drawingCTX = createContext<drawingCTXInterface>({} as drawingCTXInterface);

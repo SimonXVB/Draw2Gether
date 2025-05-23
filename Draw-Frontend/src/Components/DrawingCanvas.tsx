@@ -50,7 +50,7 @@ export function DrawingCanvas() {
 
     return (
         <>
-            <Toolbar/>
+            <Toolbar canvas={canvasRef.current!}/>
             <canvas ref={canvasRef} width={window.innerWidth} height={window.innerHeight} className="outline-2 outline-red-500 cursor-none"
                 onMouseDown={e => e.button === 0 && setIsDrawing(true)}
                 onMouseUp={() => {stopDrawing(canvasRef.current!); setIsDrawing(false)}}

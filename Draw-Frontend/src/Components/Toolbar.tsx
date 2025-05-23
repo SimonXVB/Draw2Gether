@@ -1,8 +1,11 @@
 import { useContext } from "react"
 import { selectionCTX } from "../Context/SelectionContext/selectionCTX"
+import { useUndoRedo } from "../Hooks/useUndoRedo";
 
-export function Toolbar() {
+export function Toolbar({ canvas }: { canvas: HTMLCanvasElement }) {
     const { setCurrentSelection, currentSelection } = useContext(selectionCTX);
+
+    const { undo, redo } = useUndoRedo();
 
     function setColor(e: React.ChangeEvent<HTMLInputElement>) {
         setCurrentSelection(prev => {
@@ -60,6 +63,10 @@ export function Toolbar() {
                         </svg>
                     }
                 </button>
+            </div>
+            <div className="flex gap-2 *:bg-red-400 *:p-2 *:rounded-md *:w-full *:cursor-pointer">
+                <button onClick={() => undo(canvas)}>Undo</button>
+                <button onClick={() => redo(canvas)}>Redo</button>
             </div>
         </div>
     )

@@ -4,7 +4,7 @@ import { drawingCTX } from "../Context/DrawingContext/drawingCTX";
 
 export function useRenderCanvas() {
     const coordsContext = useContext(coordsCTX);
-    const drawingInfo = useContext(drawingCTX);
+    const { drawingInfo } = useContext(drawingCTX);
 
     function render(canvas: HTMLCanvasElement) {
         const ctx = canvas.getContext("2d")!;
