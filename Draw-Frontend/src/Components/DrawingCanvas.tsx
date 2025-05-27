@@ -6,6 +6,8 @@ import { useDrawOnCanvas } from "../Hooks/useDrawOnCanvas";
 import { Toolbar } from "./Toolbar";
 import { selectionCTX } from "../Context/SelectionContext/selectionCTX";
 import { coordsCTX } from "../Context/CoordsContext/coordsCTX";
+import { drawingCTX, type drawingInterface } from "../Context/DrawingContext/drawingCTX";
+import { socket } from "../socket";
 
 export function DrawingCanvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -15,6 +17,7 @@ export function DrawingCanvas() {
 
     const { currentSelection } = useContext(selectionCTX);
     const { scale } = useContext(coordsCTX);
+    const { drawingInfo } = useContext(drawingCTX);
 
     const { render } = useRenderCanvas();
     const { addPanListeners } = usePanCanvas();
@@ -40,11 +43,30 @@ export function DrawingCanvas() {
         mouseCursor(e);
     };
 
+    function stopDraw() {
+        if(isDrawing) {
+            stopDrawing(canvasRef.current!);
+            setIsDrawing(false);
+        };
+    };
+
+    function pushResDrawingInfo(newInfo: drawingInterface) {
+        drawingInfo.push(newInfo);
+        render(canvasRef.current!);
+    };
+
     useEffect(() => {
         addPanListeners(canvasRef.current!);
         addZoomListeners(canvasRef.current!);
+    
+        socket.on("resDrawingInfo", pushResDrawingInfo);
 
         render(canvasRef.current!);
+
+
+        return () => {
+            socket.off("resDrawingInfo", pushResDrawingInfo);
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -53,7 +75,7 @@ export function DrawingCanvas() {
             <Toolbar canvas={canvasRef.current!}/>
             <canvas ref={canvasRef} width={window.innerWidth} height={window.innerHeight} className="outline-2 outline-red-500 cursor-none"
                 onMouseDown={e => e.button === 0 && setIsDrawing(true)}
-                onMouseUp={() => {stopDrawing(canvasRef.current!); setIsDrawing(false)}}
+                onMouseUp={stopDraw}
                 onMouseMove={e => addMouseMoveListeners(e)}
                 onMouseOut={() => cursorRef.current!.style.display = "none"}
 

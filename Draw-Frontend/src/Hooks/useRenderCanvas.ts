@@ -14,10 +14,10 @@ export function useRenderCanvas() {
         ctx.setTransform(coordsContext.scale, 0, 0, coordsContext.scale, coordsContext.x, coordsContext.y);
 
         ctx.fillStyle = "#1ee825";
-        ctx.fillRect(0, 0, 20, 20);
+        ctx.fillRect(-10, -10, 20, 20);
 
         ctx.lineWidth = 20;
-        ctx.fillStyle = "#000";
+        ctx.fillStyle = "#000000";
         ctx.strokeRect(-3500, -3500, 7000, 7000);
 
         drawingInfo.forEach(drawing => {

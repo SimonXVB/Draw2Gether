@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { selectionCTX } from "../Context/SelectionContext/selectionCTX";
 import { coordsCTX } from "../Context/CoordsContext/coordsCTX";
 import { drawingCTX, type drawingInterface } from "../Context/DrawingContext/drawingCTX";
+import { socket } from "../socket";
 
 export function useDrawOnCanvas() {
     const { currentSelection } = useContext(selectionCTX);
@@ -9,7 +10,7 @@ export function useDrawOnCanvas() {
     const { drawingInfo } = useContext(drawingCTX);
 
     const currentDrawingInfo: drawingInterface = {
-        color: currentSelection.color,
+        color: currentSelection.mode === "draw" ? currentSelection.color : "#ffffff",
         size: currentSelection.size,
         coords: []
     };
@@ -17,12 +18,7 @@ export function useDrawOnCanvas() {
     function mouseDrawOnCanvas(e: React.MouseEvent<HTMLCanvasElement>, canvas: HTMLCanvasElement) {
         const ctx = canvas.getContext("2d")!;
 
-        if(currentSelection.mode === "draw") {
-            ctx.strokeStyle = currentSelection.color;
-        } else if(currentSelection.mode === "erase") {
-            ctx.strokeStyle = "#ffffff";
-        };
-
+        ctx.strokeStyle = currentSelection.mode === "draw" ? currentSelection.color : "#ffffff";
         ctx.lineWidth = currentSelection.size;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
@@ -39,12 +35,7 @@ export function useDrawOnCanvas() {
     function touchDrawOnCanvas(e: React.TouchEvent<HTMLCanvasElement>, canvas: HTMLCanvasElement) {
         const ctx = canvas.getContext("2d")!;
 
-        if(currentSelection.mode === "draw") {
-            ctx.strokeStyle = currentSelection.color;
-        } else if(currentSelection.mode === "erase") {
-            ctx.strokeStyle = "#ffffff";
-        };
-
+        ctx.strokeStyle = currentSelection.mode === "draw" ? currentSelection.color : "#ffffff";
         ctx.lineWidth = currentSelection.size;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
@@ -59,11 +50,11 @@ export function useDrawOnCanvas() {
     };
 
     function stopDrawing(canvas: HTMLCanvasElement) {
-        const ctx = canvas.getContext("2d");
-
-        ctx!.beginPath();
-
+        const ctx = canvas.getContext("2d")!;
+        ctx.beginPath();
         drawingInfo.push(currentDrawingInfo);
+
+        socket.emit("pushDrawingInfo", currentDrawingInfo);
     };
 
     return { mouseDrawOnCanvas, touchDrawOnCanvas, stopDrawing };
