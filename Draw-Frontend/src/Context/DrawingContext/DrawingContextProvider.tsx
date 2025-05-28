@@ -5,11 +5,8 @@ export function DrawingContextProvider({ children }: { children: React.ReactNode
     const drawingInfoRef = useRef<drawingInterface[]>([]);
     const redoArrRef = useRef<drawingInterface[]>([]);
 
-    const drawingInfo = drawingInfoRef.current;
-    const redoArr = redoArrRef.current;
-
     return (
-        <drawingCTX.Provider value={{drawingInfo, redoArr}}>
+        <drawingCTX.Provider value={{drawingInfoRef, redoArrRef}}>
             {children}
         </drawingCTX.Provider>
     )

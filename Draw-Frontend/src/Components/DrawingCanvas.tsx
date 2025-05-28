@@ -17,7 +17,7 @@ export function DrawingCanvas() {
 
     const { currentSelection } = useContext(selectionCTX);
     const { scale } = useContext(coordsCTX);
-    const { drawingInfo } = useContext(drawingCTX);
+    const { drawingInfoRef } = useContext(drawingCTX);
 
     const { render } = useRenderCanvas();
     const { addPanListeners } = usePanCanvas();
@@ -51,7 +51,12 @@ export function DrawingCanvas() {
     };
 
     function pushResDrawingInfo(newInfo: drawingInterface) {
-        drawingInfo.push(newInfo);
+        drawingInfoRef.current.push(newInfo);
+        render(canvasRef.current!);
+    };
+
+    function setNewDrawingInfo(newDrawingInfo: drawingInterface[]) {
+        drawingInfoRef.current = newDrawingInfo;
         render(canvasRef.current!);
     };
 
@@ -60,20 +65,21 @@ export function DrawingCanvas() {
         addZoomListeners(canvasRef.current!);
     
         socket.on("resDrawingInfo", pushResDrawingInfo);
+        socket.on("emitDrawingData", setNewDrawingInfo);
 
         render(canvasRef.current!);
 
-
         return () => {
             socket.off("resDrawingInfo", pushResDrawingInfo);
+            socket.off("emitDrawingData", setNewDrawingInfo);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
         <>
-            <Toolbar canvas={canvasRef.current!}/>
-            <canvas ref={canvasRef} width={window.innerWidth} height={window.innerHeight} className="outline-2 outline-red-500 cursor-none"
+            <Toolbar canvas={canvasRef}/>
+            <canvas ref={node => {canvasRef.current = node}} width={window.innerWidth} height={window.innerHeight} className="outline-2 outline-red-500 cursor-none"
                 onMouseDown={e => e.button === 0 && setIsDrawing(true)}
                 onMouseUp={stopDraw}
                 onMouseMove={e => addMouseMoveListeners(e)}

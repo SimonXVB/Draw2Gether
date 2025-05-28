@@ -9,5 +9,10 @@ io.on("connection", (socket) => {
     socket.on("pushDrawingInfo", (drawingInfo) => {
         socket.broadcast.emit("resDrawingInfo", drawingInfo);
     });
+    socket.on("undo", () => {
+        console.log("asdad");
+        socket.broadcast.emit("emitUndo");
+    });
 });
+console.log("asadsasdasd");
 io.listen(8080);

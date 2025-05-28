@@ -4,7 +4,7 @@ import { drawingCTX } from "../Context/DrawingContext/drawingCTX";
 
 export function useRenderCanvas() {
     const coordsContext = useContext(coordsCTX);
-    const { drawingInfo } = useContext(drawingCTX);
+    const { drawingInfoRef } = useContext(drawingCTX);
 
     function render(canvas: HTMLCanvasElement) {
         const ctx = canvas.getContext("2d")!;
@@ -20,7 +20,7 @@ export function useRenderCanvas() {
         ctx.fillStyle = "#000000";
         ctx.strokeRect(-3500, -3500, 7000, 7000);
 
-        drawingInfo.forEach(drawing => {
+        drawingInfoRef.current.forEach(drawing => {
             ctx.strokeStyle = drawing.color;
             ctx.lineWidth = drawing.size;
             ctx.lineCap = "round";

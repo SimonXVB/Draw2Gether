@@ -1,4 +1,4 @@
-const { Server } = require("socket.io");
+import { Server, Socket } from "socket.io";
 
 const io = new Server({
     cors: {
@@ -6,9 +6,22 @@ const io = new Server({
     }
 });
 
-io.on("connection", (socket: any) => {
+const drawingData: any = [];
+
+io.on("connection", (socket) => {
+    socket.emit("emitDrawingData", drawingData);
+
     socket.on("pushDrawingInfo", (drawingInfo: any) => {
+        drawingData.push(drawingInfo);
         socket.broadcast.emit("resDrawingInfo" , drawingInfo);
+    });
+
+    socket.on("undoDrawing", () => {
+        socket.broadcast.emit("emitUndo");
+    });
+
+    socket.on("redoDrawing", () => {
+        socket.broadcast.emit("emitRedo");
     });
 });
 

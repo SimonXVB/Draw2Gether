@@ -7,7 +7,7 @@ import { socket } from "../socket";
 export function useDrawOnCanvas() {
     const { currentSelection } = useContext(selectionCTX);
     const { scale, x, y } = useContext(coordsCTX);
-    const { drawingInfo } = useContext(drawingCTX);
+    const { drawingInfoRef } = useContext(drawingCTX);
 
     const currentDrawingInfo: drawingInterface = {
         color: currentSelection.mode === "draw" ? currentSelection.color : "#ffffff",
@@ -52,7 +52,7 @@ export function useDrawOnCanvas() {
     function stopDrawing(canvas: HTMLCanvasElement) {
         const ctx = canvas.getContext("2d")!;
         ctx.beginPath();
-        drawingInfo.push(currentDrawingInfo);
+        drawingInfoRef.current.push(currentDrawingInfo);
 
         socket.emit("pushDrawingInfo", currentDrawingInfo);
     };

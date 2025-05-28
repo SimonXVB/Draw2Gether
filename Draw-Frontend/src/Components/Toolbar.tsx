@@ -1,8 +1,9 @@
-import { useContext } from "react"
+import { useContext, useEffect } from "react"
 import { selectionCTX } from "../Context/SelectionContext/selectionCTX"
 import { useUndoRedo } from "../Hooks/useUndoRedo";
+import { socket } from "../socket";
 
-export function Toolbar({ canvas }: { canvas: HTMLCanvasElement }) {
+export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement | null> }) {
     const { setCurrentSelection, currentSelection } = useContext(selectionCTX);
 
     const { undo, redo } = useUndoRedo();
@@ -34,6 +35,31 @@ export function Toolbar({ canvas }: { canvas: HTMLCanvasElement }) {
         });
     };
 
+    function undoDrawing() {
+        socket.emit("undoDrawing");
+        undo(canvas.current!);
+    };
+
+    function redoDrawing() {
+        socket.emit("redoDrawing");
+        redo(canvas.current!);
+    };
+
+    useEffect(() => {
+        const callUndo = () => undo(canvas.current!);
+        const callRedo = () => redo(canvas.current!);
+
+        socket.on("emitUndo", callUndo);
+        socket.on("emitRedo", callRedo);
+
+        return () => {
+            socket.off("emitUndo", callUndo);
+            socket.off("emitRedo", callRedo);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+
     return (
         <div className="fixed flex items-center top-0 left-0 w-screen p-3 font-[DynaPuff] bg-red-400/50 backdrop-blur-md gap-2">
             <input type="color" className="cursor-pointer" onChange={e => setColor(e)}/>
@@ -53,13 +79,13 @@ export function Toolbar({ canvas }: { canvas: HTMLCanvasElement }) {
                 }
             </button>
             <div className="flex gap-2 *:bg-red-400 *:outline-2 *:outline-red-400 *:p-3 *:rounded-md *:w-full *:cursor-pointer *:hover:bg-white">
-                <button onClick={() => undo(canvas)} className="hover:*:fill-red-400">
+                <button onClick={undoDrawing} className="hover:*:fill-red-400">
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#fff" viewBox="0 0 16 16">
                         <path fillRule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z"/>
                         <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466"/>
                     </svg>
                 </button>
-                <button onClick={() => redo(canvas)} className="hover:*:fill-red-400">
+                <button onClick={redoDrawing} className="hover:*:fill-red-400">
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#fff" viewBox="0 0 16 16">
                         <path fillRule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
                         <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
