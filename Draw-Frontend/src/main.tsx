@@ -1,16 +1,15 @@
 import { DrawingCanvas } from "./Components/DrawingCanvas"
-import { CoordsCTXProvider } from "./Context/CoordsContext/CoordsCTXProvider"
-import { SelectionCTXProvider } from "./Context/SelectionContext/SelectionCTXProvider"
-import { DrawingContextProvider } from "./Context/DrawingContext/DrawingContextProvider"
+import { JoinPage } from "./Components/JoinPage"
+import { globalSettingsCTX } from "./Context/GlobalSettingsContext/globalSettingsCTX";
+import { useContext } from "react"
 
 export function Main() {
+    const { globalSettings } = useContext(globalSettingsCTX);
+
     return (
-        <DrawingContextProvider>
-        <CoordsCTXProvider>
-        <SelectionCTXProvider>
-            <DrawingCanvas/>
-        </SelectionCTXProvider>
-        </CoordsCTXProvider>
-        </DrawingContextProvider>
+        <>
+            {!globalSettings.isJoined && <JoinPage/>}
+            {globalSettings.isJoined && <DrawingCanvas/>}
+        </>
     )
 };

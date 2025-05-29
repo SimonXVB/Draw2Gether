@@ -1,25 +1,25 @@
 import { useContext } from "react";
-import { selectionCTX } from "../Context/SelectionContext/selectionCTX";
+import { globalSettingsCTX } from "../Context/GlobalSettingsContext/globalSettingsCTX";
 import { coordsCTX } from "../Context/CoordsContext/coordsCTX";
 import { drawingCTX, type drawingInterface } from "../Context/DrawingContext/drawingCTX";
 import { socket } from "../socket";
 
 export function useDrawOnCanvas() {
-    const { currentSelection } = useContext(selectionCTX);
+    const { globalSettings } = useContext(globalSettingsCTX);
     const { scale, x, y } = useContext(coordsCTX);
     const { drawingInfoRef } = useContext(drawingCTX);
 
     const currentDrawingInfo: drawingInterface = {
-        color: currentSelection.mode === "draw" ? currentSelection.color : "#ffffff",
-        size: currentSelection.size,
+        color: globalSettings.mode === "draw" ? globalSettings.color : "#ffffff",
+        size: globalSettings.size,
         coords: []
     };
 
     function mouseDrawOnCanvas(e: React.MouseEvent<HTMLCanvasElement>, canvas: HTMLCanvasElement) {
         const ctx = canvas.getContext("2d")!;
 
-        ctx.strokeStyle = currentSelection.mode === "draw" ? currentSelection.color : "#ffffff";
-        ctx.lineWidth = currentSelection.size;
+        ctx.strokeStyle = globalSettings.mode === "draw" ? globalSettings.color : "#ffffff";
+        ctx.lineWidth = globalSettings.size;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
 
@@ -35,8 +35,8 @@ export function useDrawOnCanvas() {
     function touchDrawOnCanvas(e: React.TouchEvent<HTMLCanvasElement>, canvas: HTMLCanvasElement) {
         const ctx = canvas.getContext("2d")!;
 
-        ctx.strokeStyle = currentSelection.mode === "draw" ? currentSelection.color : "#ffffff";
-        ctx.lineWidth = currentSelection.size;
+        ctx.strokeStyle = globalSettings.mode === "draw" ? globalSettings.color : "#ffffff";
+        ctx.lineWidth = globalSettings.size;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
 
@@ -54,7 +54,7 @@ export function useDrawOnCanvas() {
         ctx.beginPath();
         drawingInfoRef.current.push(currentDrawingInfo);
 
-        socket.emit("pushDrawingInfo", currentDrawingInfo);
+        socket.emit("sendNewData", currentDrawingInfo);
     };
 
     return { mouseDrawOnCanvas, touchDrawOnCanvas, stopDrawing };

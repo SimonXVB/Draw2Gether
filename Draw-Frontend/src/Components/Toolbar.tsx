@@ -1,15 +1,15 @@
 import { useContext, useEffect } from "react"
-import { selectionCTX } from "../Context/SelectionContext/selectionCTX"
+import { globalSettingsCTX } from "../Context/GlobalSettingsContext/globalSettingsCTX"
 import { useUndoRedo } from "../Hooks/useUndoRedo";
 import { socket } from "../socket";
 
 export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement | null> }) {
-    const { setCurrentSelection, currentSelection } = useContext(selectionCTX);
+    const { globalSettings, setGlobalSettings } = useContext(globalSettingsCTX);
 
     const { undo, redo } = useUndoRedo();
 
     function setColor(e: React.ChangeEvent<HTMLInputElement>) {
-        setCurrentSelection(prev => {
+        setGlobalSettings(prev => {
             return {
                 ...prev,
                 color: e.target.value
@@ -18,7 +18,7 @@ export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement 
     };
 
     function setSize(e: React.ChangeEvent<HTMLInputElement>) {
-        setCurrentSelection(prev => {
+        setGlobalSettings(prev => {
             return {
                 ...prev,
                 size: Number(e.target.value)
@@ -27,10 +27,10 @@ export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement 
     };
 
     function setMode() {
-        setCurrentSelection(prev => {
+        setGlobalSettings(prev => {
             return {
                 ...prev,
-                mode: currentSelection.mode === "erase" ? "draw" : "erase"
+                mode: globalSettings.mode === "erase" ? "draw" : "erase"
             }
         });
     };
@@ -64,11 +64,11 @@ export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement 
         <div className="fixed flex items-center top-0 left-0 w-screen p-3 font-[DynaPuff] bg-red-400/50 backdrop-blur-md gap-2">
             <input type="color" className="cursor-pointer" onChange={e => setColor(e)}/>
             <div className="flex justify-between items-center gap-2 w-[300px]">
-                <input type="range" min={1} max={500} step={1} defaultValue={currentSelection.size} onChange={e => setSize(e)} className="w-[80%] cursor-pointer"/>
-                <span>{currentSelection.size}px</span>
+                <input type="range" min={1} max={500} step={1} defaultValue={globalSettings.size} onChange={e => setSize(e)} className="w-[80%] cursor-pointer"/>
+                <span>{globalSettings.size}px</span>
             </div>
             <button className="flex justify-center cursor-pointer bg-red-400 outline-2 outline-red-400 p-3 rounded-md hover:bg-white hover:*:fill-red-400" onClick={setMode}>
-                {currentSelection.mode === "erase" ? 
+                {globalSettings.mode === "erase" ? 
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#fff" viewBox="0 0 16 16">
                         <path d="M8.086 2.207a2 2 0 0 1 2.828 0l3.879 3.879a2 2 0 0 1 0 2.828l-5.5 5.5A2 2 0 0 1 7.879 15H5.12a2 2 0 0 1-1.414-.586l-2.5-2.5a2 2 0 0 1 0-2.828zm.66 11.34L3.453 8.254 1.914 9.793a1 1 0 0 0 0 1.414l2.5 2.5a1 1 0 0 0 .707.293H7.88a1 1 0 0 0 .707-.293z"/>
                     </svg>

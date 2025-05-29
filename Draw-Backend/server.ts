@@ -6,14 +6,22 @@ const io = new Server({
     }
 });
 
-const drawingData: any = [];
+const connectedClients: string[] = [];
 
 io.on("connection", (socket) => {
-    socket.emit("emitDrawingData", drawingData);
+    // Send drawing data to newly connected client by fetching relevant data from "host"
 
-    socket.on("pushDrawingInfo", (drawingInfo: any) => {
-        drawingData.push(drawingInfo);
-        socket.broadcast.emit("resDrawingInfo" , drawingInfo);
+/*     if(connectedClients.length > 1) {
+        io.to(connectedClients[0]).emit("requestInitialData");
+        console.log("initial data req sent");
+    }; */
+
+    socket.on("sendInitialData", data => {
+        io.to(connectedClients[connectedClients.length - 1]).emit("receiveInitialData", data);
+    });
+
+    socket.on("sendNewData", drawingData => {
+        socket.broadcast.emit("receiveNewData", drawingData);
     });
 
     socket.on("undoDrawing", () => {
@@ -23,6 +31,37 @@ io.on("connection", (socket) => {
     socket.on("redoDrawing", () => {
         socket.broadcast.emit("emitRedo");
     });
+
+    //Join room function
+    socket.on("joinRoom", async (input) => {
+        const sockets = await io.in(input.roomName).fetchSockets();
+
+        if(sockets.length > 0) {
+            const password = sockets[0].data.password;
+
+            if(input.password === password) {
+                socket.join(input.roomName);
+                socket.data.password = password;
+
+                io.to(socket.id).emit("joinedRoom", {
+                    roomName: input.roomName,
+                    isJoined: true
+                });
+            } else {
+                console.log("wrong credentials");
+            };
+        } else {
+            socket.join(input.roomName);
+            socket.data.password = input.password;
+
+            io.to(socket.id).emit("joinedRoom", {
+                roomName: input.roomName,
+                isJoined: true
+            });
+        };
+    });
+
+    socket.on("disconnect", () => connectedClients.splice(connectedClients.indexOf(socket.id), 1));
 });
 
 io.listen(8080);

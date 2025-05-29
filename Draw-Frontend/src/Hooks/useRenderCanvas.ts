@@ -17,7 +17,7 @@ export function useRenderCanvas() {
         ctx.fillRect(-10, -10, 20, 20);
 
         ctx.lineWidth = 20;
-        ctx.fillStyle = "#000000";
+        ctx.strokeStyle = "#000000";
         ctx.strokeRect(-3500, -3500, 7000, 7000);
 
         drawingInfoRef.current.forEach(drawing => {

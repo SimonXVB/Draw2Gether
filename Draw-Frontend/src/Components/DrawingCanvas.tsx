@@ -4,7 +4,7 @@ import { usePanCanvas } from "../Hooks/usePanCanvas";
 import { useZoomCanvas } from "../Hooks/useZoomCanvas";
 import { useDrawOnCanvas } from "../Hooks/useDrawOnCanvas";
 import { Toolbar } from "./Toolbar";
-import { selectionCTX } from "../Context/SelectionContext/selectionCTX";
+import { globalSettingsCTX } from "../Context/GlobalSettingsContext/globalSettingsCTX";
 import { coordsCTX } from "../Context/CoordsContext/coordsCTX";
 import { drawingCTX, type drawingInterface } from "../Context/DrawingContext/drawingCTX";
 import { socket } from "../socket";
@@ -15,7 +15,7 @@ export function DrawingCanvas() {
 
     const [isDrawing, setIsDrawing] = useState<boolean>(false);
 
-    const { currentSelection } = useContext(selectionCTX);
+    const { globalSettings } = useContext(globalSettingsCTX);
     const { scale } = useContext(coordsCTX);
     const { drawingInfoRef } = useContext(drawingCTX);
 
@@ -28,12 +28,12 @@ export function DrawingCanvas() {
         const cursor = cursorRef.current!;
 
         cursor.style.display = "block";
-        cursor.style.width = (currentSelection.size * scale) + "px";
-        cursor.style.height = (currentSelection.size * scale) + "px";
-        cursor.style.border = "1px solid" + currentSelection.color;
+        cursor.style.width = (globalSettings.size * scale) + "px";
+        cursor.style.height = (globalSettings.size * scale) + "px";
+        cursor.style.border = "1px solid" + globalSettings.color;
 
-        cursor.style.top = (e.clientY - ((currentSelection.size * scale) / 2)) + "px";
-        cursor.style.left = (e.clientX - ((currentSelection.size * scale) / 2)) + "px";
+        cursor.style.top = (e.clientY - ((globalSettings.size * scale) / 2)) + "px";
+        cursor.style.left = (e.clientX - ((globalSettings.size * scale) / 2)) + "px";
     };
 
     function addMouseMoveListeners(e: React.MouseEvent<HTMLCanvasElement>) {
@@ -50,28 +50,38 @@ export function DrawingCanvas() {
         };
     };
 
-    function pushResDrawingInfo(newInfo: drawingInterface) {
-        drawingInfoRef.current.push(newInfo);
-        render(canvasRef.current!);
+    // Socket.io functions
+    function sendInitialData() {
+        socket.emit("sendInitialData", drawingInfoRef.current);
+        console.log("initial data sent");
     };
 
-    function setNewDrawingInfo(newDrawingInfo: drawingInterface[]) {
-        drawingInfoRef.current = newDrawingInfo;
+    function receiveInitialData(drawingData: drawingInterface[]) {
+        drawingInfoRef.current = drawingData
         render(canvasRef.current!);
+        console.log("initial data set");
+    };
+
+    function receiveNewData(drawingData: drawingInterface) {
+        drawingInfoRef.current.push(drawingData);
+        render(canvasRef.current!);
+        console.log("new data set");
     };
 
     useEffect(() => {
         addPanListeners(canvasRef.current!);
         addZoomListeners(canvasRef.current!);
     
-        socket.on("resDrawingInfo", pushResDrawingInfo);
-        socket.on("emitDrawingData", setNewDrawingInfo);
+        socket.on("requestInitialData", sendInitialData);
+        socket.on("receiveInitialData", receiveInitialData);
+        socket.on("receiveNewData", receiveNewData);
 
         render(canvasRef.current!);
 
         return () => {
-            socket.off("resDrawingInfo", pushResDrawingInfo);
-            socket.off("emitDrawingData", setNewDrawingInfo);
+            socket.off("requestInitialData", sendInitialData);
+            socket.off("receiveInitialData", receiveInitialData);
+            socket.off("receiveNewData", receiveNewData);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
