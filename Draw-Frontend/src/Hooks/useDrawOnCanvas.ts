@@ -54,7 +54,10 @@ export function useDrawOnCanvas() {
         ctx.beginPath();
         drawingInfoRef.current.push(currentDrawingInfo);
 
-        socket.emit("sendNewData", currentDrawingInfo);
+        socket.emit("sendNewData", {
+            roomName: globalSettings.roomName,
+            newDrawingInfo: currentDrawingInfo
+        });
     };
 
     return { mouseDrawOnCanvas, touchDrawOnCanvas, stopDrawing };

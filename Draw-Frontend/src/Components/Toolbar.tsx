@@ -5,7 +5,6 @@ import { socket } from "../socket";
 
 export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement | null> }) {
     const { globalSettings, setGlobalSettings } = useContext(globalSettingsCTX);
-
     const { undo, redo } = useUndoRedo();
 
     function setColor(e: React.ChangeEvent<HTMLInputElement>) {
@@ -36,12 +35,12 @@ export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement 
     };
 
     function undoDrawing() {
-        socket.emit("undoDrawing");
+        socket.emit("sendUndo", globalSettings.roomName);
         undo(canvas.current!);
     };
 
     function redoDrawing() {
-        socket.emit("redoDrawing");
+        socket.emit("sendRedo", globalSettings.roomName);
         redo(canvas.current!);
     };
 
@@ -49,12 +48,12 @@ export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement 
         const callUndo = () => undo(canvas.current!);
         const callRedo = () => redo(canvas.current!);
 
-        socket.on("emitUndo", callUndo);
-        socket.on("emitRedo", callRedo);
+        socket.on("receiveUndo", callUndo);
+        socket.on("receiveRedo", callRedo);
 
         return () => {
-            socket.off("emitUndo", callUndo);
-            socket.off("emitRedo", callRedo);
+            socket.off("receiveUndo", callUndo);
+            socket.off("receiveRedo", callRedo);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -92,6 +91,8 @@ export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement 
                     </svg>
                 </button>
             </div>
+            <h1>{globalSettings.isHost ? "You are the host" : "You are a client"}</h1>
+            <button onClick={() => socket.disconnect()}>DC</button>
         </div>
     )
 };

@@ -12,12 +12,13 @@ import { socket } from "../socket";
 export function DrawingCanvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const cursorRef = useRef<HTMLDivElement>(null);
-
+    const initialEmitRef = useRef<boolean>(true);
+    
     const [isDrawing, setIsDrawing] = useState<boolean>(false);
 
-    const { globalSettings } = useContext(globalSettingsCTX);
+    const { globalSettings, setGlobalSettings } = useContext(globalSettingsCTX);
     const { scale } = useContext(coordsCTX);
-    const { drawingInfoRef } = useContext(drawingCTX);
+    const { drawingInfoRef, redoArrRef } = useContext(drawingCTX);
 
     const { render } = useRenderCanvas();
     const { addPanListeners } = usePanCanvas();
@@ -50,38 +51,70 @@ export function DrawingCanvas() {
         };
     };
 
-    // Socket.io functions
-    function sendInitialData() {
-        socket.emit("sendInitialData", drawingInfoRef.current);
-        console.log("initial data sent");
+    //Socket.io functions
+    function sendInitialDataHost() {
+        socket.emit("sendInitialDataHost", {
+            drawingInfo: drawingInfoRef.current,
+            redoArr: redoArrRef.current,
+            roomName: globalSettings.roomName
+        });
     };
 
-    function receiveInitialData(drawingData: drawingInterface[]) {
-        drawingInfoRef.current = drawingData
+    function setInitialData(data: { drawingInfo: drawingInterface[], redoArr: drawingInterface[] }) {
+        drawingInfoRef.current = data.drawingInfo;
+        redoArrRef.current = data.redoArr;
+
         render(canvasRef.current!);
-        console.log("initial data set");
     };
 
-    function receiveNewData(drawingData: drawingInterface) {
-        drawingInfoRef.current.push(drawingData);
+    function setNewData(newDrawingInfo: drawingInterface) {
+        drawingInfoRef.current.push(newDrawingInfo);
         render(canvasRef.current!);
-        console.log("new data set");
+    };
+
+    function setHostChange() {
+        setGlobalSettings(prev => {
+            return {
+                ...prev,
+                isHost: true
+            };
+        });
+    };
+
+    function setDisconnect() {
+        setGlobalSettings(prev => {
+            return {
+                ...prev,
+                isJoined: false,
+                isHost: false,
+                isDisconnected: true,
+                roomName: ""
+            }
+        });
     };
 
     useEffect(() => {
         addPanListeners(canvasRef.current!);
         addZoomListeners(canvasRef.current!);
-    
-        socket.on("requestInitialData", sendInitialData);
-        socket.on("receiveInitialData", receiveInitialData);
-        socket.on("receiveNewData", receiveNewData);
 
-        render(canvasRef.current!);
+        if(initialEmitRef.current === true) {
+            socket.emit("initialDataReqClient", globalSettings.roomName);
+        };
+
+        socket.on("initialDataRequestHost", sendInitialDataHost);
+        socket.on("receiveInitialData", setInitialData);
+        socket.on("receiveNewData", setNewData);
+        socket.on("hostChange", setHostChange);
+        socket.on("disconnect", setDisconnect);
 
         return () => {
-            socket.off("requestInitialData", sendInitialData);
-            socket.off("receiveInitialData", receiveInitialData);
-            socket.off("receiveNewData", receiveNewData);
+            initialEmitRef.current = false;
+
+            socket.off("initialDataRequestHost", sendInitialDataHost);
+            socket.off("receiveInitialData", setInitialData);
+            socket.off("receiveNewData", setNewData);
+            socket.off("hostChange", setHostChange);
+            socket.off("disconnect", setDisconnect);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -89,7 +122,7 @@ export function DrawingCanvas() {
     return (
         <>
             <Toolbar canvas={canvasRef}/>
-            <canvas ref={node => {canvasRef.current = node}} width={window.innerWidth} height={window.innerHeight} className="outline-2 outline-red-500 cursor-none"
+            <canvas ref={ref => {canvasRef.current = ref}} width={window.innerWidth} height={window.innerHeight} className="outline-2 outline-red-500 cursor-none"
                 onMouseDown={e => e.button === 0 && setIsDrawing(true)}
                 onMouseUp={stopDraw}
                 onMouseMove={e => addMouseMoveListeners(e)}

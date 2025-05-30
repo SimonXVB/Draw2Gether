@@ -6,7 +6,10 @@ export function GlobalSettingsCTXProvider({children}: {children: React.ReactNode
         color: "#000000",
         size: 10,
         mode: "draw",
-        isJoined: false
+        isJoined: false,
+        isHost: false,
+        isDisconnected: false,
+        roomName: ""
     });
 
     return (
