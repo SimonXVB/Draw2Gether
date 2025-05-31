@@ -5,11 +5,7 @@ export function GlobalSettingsCTXProvider({children}: {children: React.ReactNode
     const [globalSettings, setGlobalSettings] = useState<globalSettingsInterface>({
         color: "#000000",
         size: 10,
-        mode: "draw",
-        isJoined: false,
-        isHost: false,
-        isDisconnected: false,
-        roomName: ""
+        mode: "draw"
     });
 
     return (

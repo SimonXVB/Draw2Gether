@@ -1,15 +1,15 @@
 import { DrawingCanvas } from "./Components/DrawingCanvas"
 import { JoinPage } from "./Components/JoinPage"
-import { globalSettingsCTX } from "./Context/GlobalSettingsContext/globalSettingsCTX";
+import { clientDataCTX } from "./Context/ClientData/clientDataCTX";
 import { useContext } from "react"
 
 export function Main() {
-    const { globalSettings } = useContext(globalSettingsCTX);
+    const { clientData } = useContext(clientDataCTX);
 
     return (
         <>
-            {!globalSettings.isJoined && <JoinPage/>}
-            {globalSettings.isJoined && <DrawingCanvas/>}
+            {!clientData.isJoined && <JoinPage/>}
+            {clientData.isJoined && <DrawingCanvas/>}
         </>
     )
 };

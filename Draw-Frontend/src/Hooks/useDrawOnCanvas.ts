@@ -2,12 +2,14 @@ import { useContext } from "react";
 import { globalSettingsCTX } from "../Context/GlobalSettingsContext/globalSettingsCTX";
 import { coordsCTX } from "../Context/CoordsContext/coordsCTX";
 import { drawingCTX, type drawingInterface } from "../Context/DrawingContext/drawingCTX";
+import { clientDataCTX } from "../Context/ClientData/clientDataCTX";
 import { socket } from "../socket";
 
 export function useDrawOnCanvas() {
     const { globalSettings } = useContext(globalSettingsCTX);
     const { scale, x, y } = useContext(coordsCTX);
     const { drawingInfoRef } = useContext(drawingCTX);
+    const { clientData } = useContext(clientDataCTX);
 
     const currentDrawingInfo: drawingInterface = {
         color: globalSettings.mode === "draw" ? globalSettings.color : "#ffffff",
@@ -55,7 +57,7 @@ export function useDrawOnCanvas() {
         drawingInfoRef.current.push(currentDrawingInfo);
 
         socket.emit("sendNewData", {
-            roomName: globalSettings.roomName,
+            roomName: clientData.roomName,
             newDrawingInfo: currentDrawingInfo
         });
     };

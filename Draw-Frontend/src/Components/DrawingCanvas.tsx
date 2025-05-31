@@ -7,6 +7,7 @@ import { Toolbar } from "./Toolbar";
 import { globalSettingsCTX } from "../Context/GlobalSettingsContext/globalSettingsCTX";
 import { coordsCTX } from "../Context/CoordsContext/coordsCTX";
 import { drawingCTX, type drawingInterface } from "../Context/DrawingContext/drawingCTX";
+import { clientDataCTX } from "../Context/ClientData/clientDataCTX";
 import { socket } from "../socket";
 
 export function DrawingCanvas() {
@@ -16,9 +17,10 @@ export function DrawingCanvas() {
     
     const [isDrawing, setIsDrawing] = useState<boolean>(false);
 
-    const { globalSettings, setGlobalSettings } = useContext(globalSettingsCTX);
     const { scale } = useContext(coordsCTX);
+    const { globalSettings } = useContext(globalSettingsCTX);
     const { drawingInfoRef, redoArrRef } = useContext(drawingCTX);
+    const { setClientData } = useContext(clientDataCTX);
 
     const { render } = useRenderCanvas();
     const { addPanListeners } = usePanCanvas();
@@ -55,8 +57,7 @@ export function DrawingCanvas() {
     function sendInitialDataHost() {
         socket.emit("sendInitialDataHost", {
             drawingInfo: drawingInfoRef.current,
-            redoArr: redoArrRef.current,
-            roomName: globalSettings.roomName
+            redoArr: redoArrRef.current
         });
     };
 
@@ -72,23 +73,26 @@ export function DrawingCanvas() {
         render(canvasRef.current!);
     };
 
-    function setHostChange() {
-        setGlobalSettings(prev => {
-            return {
-                ...prev,
-                isHost: true
-            };
-        });
-    };
-
     function setDisconnect() {
-        setGlobalSettings(prev => {
+        drawingInfoRef.current = [];
+        redoArrRef.current = [];
+        
+        setClientData(prev => {
             return {
                 ...prev,
                 isJoined: false,
-                isHost: false,
                 isDisconnected: true,
-                roomName: ""
+                roomName: "",
+                clients: []
+            }
+        });
+    };
+
+    function setNewClients(clients: string[]) {
+        setClientData(prev => {
+            return {
+                ...prev,
+                clients: clients
             }
         });
     };
@@ -98,14 +102,15 @@ export function DrawingCanvas() {
         addZoomListeners(canvasRef.current!);
 
         if(initialEmitRef.current === true) {
-            socket.emit("initialDataReqClient", globalSettings.roomName);
+            socket.emit("initialDataReqClient");
         };
 
         socket.on("initialDataRequestHost", sendInitialDataHost);
         socket.on("receiveInitialData", setInitialData);
         socket.on("receiveNewData", setNewData);
-        socket.on("hostChange", setHostChange);
         socket.on("disconnect", setDisconnect);
+        socket.on("clientJoined", setNewClients);
+        socket.on("clientLeave", setNewClients);
 
         return () => {
             initialEmitRef.current = false;
@@ -113,8 +118,9 @@ export function DrawingCanvas() {
             socket.off("initialDataRequestHost", sendInitialDataHost);
             socket.off("receiveInitialData", setInitialData);
             socket.off("receiveNewData", setNewData);
-            socket.off("hostChange", setHostChange);
             socket.off("disconnect", setDisconnect);
+            socket.off("clientJoined", setNewClients);
+            socket.off("clientLeave", setNewClients);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

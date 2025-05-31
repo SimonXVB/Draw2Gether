@@ -4,9 +4,11 @@ import { Main } from './main';
 import { CoordsCTXProvider } from "./Context/CoordsContext/CoordsCTXProvider"
 import { GlobalSettingsCTXProvider } from "./Context/GlobalSettingsContext/GlobalSettingsCTXProvider"
 import { DrawingCTXProvider } from "./Context/DrawingContext/DrawingCTXProvider"
+import { ClientDataCTXProvider } from './Context/ClientData/ClientDataCTXProvider';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <ClientDataCTXProvider>
     <CoordsCTXProvider>
     <GlobalSettingsCTXProvider>
     <DrawingCTXProvider>
@@ -14,5 +16,6 @@ createRoot(document.getElementById('root')!).render(
     </DrawingCTXProvider>
     </GlobalSettingsCTXProvider>
     </CoordsCTXProvider>
+    </ClientDataCTXProvider>
   </StrictMode>
 );

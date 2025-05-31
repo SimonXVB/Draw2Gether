@@ -1,10 +1,14 @@
 import { useContext, useEffect } from "react"
 import { globalSettingsCTX } from "../Context/GlobalSettingsContext/globalSettingsCTX"
+import { clientDataCTX } from "../Context/ClientData/clientDataCTX";
+import { drawingCTX } from "../Context/DrawingContext/drawingCTX";
 import { useUndoRedo } from "../Hooks/useUndoRedo";
 import { socket } from "../socket";
 
 export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement | null> }) {
     const { globalSettings, setGlobalSettings } = useContext(globalSettingsCTX);
+    const { clientData, setClientData } = useContext(clientDataCTX);
+    const { drawingInfoRef, redoArrRef } = useContext(drawingCTX);
     const { undo, redo } = useUndoRedo();
 
     function setColor(e: React.ChangeEvent<HTMLInputElement>) {
@@ -35,13 +39,29 @@ export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement 
     };
 
     function undoDrawing() {
-        socket.emit("sendUndo", globalSettings.roomName);
+        socket.emit("sendUndo");
         undo(canvas.current!);
     };
 
     function redoDrawing() {
-        socket.emit("sendRedo", globalSettings.roomName);
+        socket.emit("sendRedo");
         redo(canvas.current!);
+    };
+
+    function leaveRoom() {
+        drawingInfoRef.current = [];
+        redoArrRef.current = [];
+
+        setClientData(prev => {
+            return {
+                ...prev,
+                roomName: "",
+                isJoined: false,
+                clients: []
+            };
+        });
+
+        socket.emit("leaveRoom");
     };
 
     useEffect(() => {
@@ -91,8 +111,8 @@ export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement 
                     </svg>
                 </button>
             </div>
-            <h1>{globalSettings.isHost ? "You are the host" : "You are a client"}</h1>
-            <button onClick={() => socket.disconnect()}>DC</button>
+            <h1>{clientData.username}</h1>
+            <button onClick={leaveRoom}>Leave Room</button>
         </div>
     )
 };

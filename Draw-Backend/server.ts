@@ -1,4 +1,5 @@
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
+import { filterClients } from "./utils";
 
 const io = new Server({
     cors: {
@@ -9,6 +10,11 @@ const io = new Server({
 io.on("connection", (socket) => {
     //Join room function
     socket.on("joinRoom", async (input) => {
+        if(input.roomName === "" || input.password === "" || input.username === "") {
+            io.to(socket.id).emit("joinError", "empty");
+            return;
+        };
+
         const sockets = await io.in(input.roomName).fetchSockets();
 
         if(sockets[0]) {
@@ -19,77 +25,83 @@ io.on("connection", (socket) => {
 
                 socket.data.password = password;
                 socket.data.roomName = sockets[0].data.roomName;
-                socket.data.isHost = false;
+                socket.data.username = input.username;
+
+                const updatedSockets = await io.in(input.roomName).fetchSockets();
 
                 io.to(socket.id).emit("joinedRoom", {
                     roomName: sockets[0].data.roomName,
-                    isHost: false
+                    username: input.username,
+                    clients: filterClients(updatedSockets)
                 });
+
+                io.to(sockets[0].data.roomName).emit("clientJoined", filterClients(updatedSockets));
             } else {
-                io.to(socket.id).emit("incorrectCreds");
+                io.to(socket.id).emit("joinError", "password");
             };
         } else {
             socket.join(input.roomName);
 
             socket.data.password = input.password;
             socket.data.roomName = input.roomName;
-            socket.data.isHost = true;
+            socket.data.username = input.username;
 
             io.to(socket.id).emit("joinedRoom", {
                 roomName: input.roomName,
-                isHost: true
+                username: input.username,
+                clients: [input.username]
             });
         };
     });
 
-    //Send initial data to client from host --Start
-    socket.on("initialDataReqClient", async (roomName: string) => {
-        const sockets = await io.in(roomName).fetchSockets();
-        const host = sockets.find(socket => socket.data.isHost === true) || sockets[0];
+    //Send initial data to client from host
+    socket.on("initialDataReqClient", async () => {
+        const sockets = await io.in(socket.data.roomName).fetchSockets();
 
-        io.to(host.id).emit("initialDataRequestHost");
+        io.to(sockets[0].id).emit("initialDataRequestHost");
     });
 
     socket.on("sendInitialDataHost", async data => {
-        const sockets = await io.in(data.roomName).fetchSockets();
+        const sockets = await io.in(socket.data.roomName).fetchSockets();
 
         socket.to(sockets[sockets.length - 1].id).emit("receiveInitialData", {
             drawingInfo: data.drawingInfo,
             redoArr: data.redoArr
         });
     });
-    //Send initial data to client from host --End
 
-    //Send current drawing data to clients --Start
+    //Send current drawing data to clients
     socket.on("sendNewData", data => {
-        socket.broadcast.to(data.roomName).emit("receiveNewData", data.newDrawingInfo);
-    });
-    //Send current drawing data to clients --End
-
-    //Undo/Redo drawings --Start
-    socket.on("sendUndo", (roomName: string) => {
-        socket.broadcast.to(roomName).emit("receiveUndo");
+        socket.broadcast.to(socket.data.roomName).emit("receiveNewData", data.newDrawingInfo);
     });
 
-    socket.on("sendRedo", (roomName: string) => {
-        socket.broadcast.to(roomName).emit("receiveRedo");
+    //Undo/Redo drawing
+    socket.on("sendUndo", () => {
+        socket.broadcast.to(socket.data.roomName).emit("receiveUndo");
     });
-    //Undo/Redo drawings --End
 
+    socket.on("sendRedo", () => {
+        socket.broadcast.to(socket.data.roomName).emit("receiveRedo");
+    });
+
+    //Leave room
+    socket.on("leaveRoom", async () => {
+        socket.leave(socket.data.roomName);
+
+        const sockets = await io.in(socket.data.roomName).fetchSockets();
+        io.to(socket.data.roomName).emit("clientLeave", filterClients(sockets));
+
+        socket.data.password = "";
+        socket.data.roomName = "";
+    });
+
+    //General disconnect function
     socket.on("disconnect", async () => {
-        if(socket.data.isHost) {
-            const sockets = await io.in(socket.data.roomName).fetchSockets();
+        const sockets = await io.in(socket.data.roomName).fetchSockets();
+        io.to(socket.data.roomName).emit("clientLeave", filterClients(sockets));
 
-            if(!sockets[0]) return;
-
-            sockets[0].data.isHost = true;
-
-            socket.data.password = "";
-            socket.data.roomName = "";
-            socket.data.isHost = false;
-
-            io.to(sockets[0].id).emit("hostChange");
-        };
+        socket.data.password = "";
+        socket.data.roomName = "";
     });
 });
 

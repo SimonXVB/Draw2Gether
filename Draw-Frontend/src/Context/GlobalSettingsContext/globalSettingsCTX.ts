@@ -5,11 +5,7 @@ type modeType = "draw" | "erase";
 export interface globalSettingsInterface {
     color: string,
     size: number,
-    mode: modeType,
-    isJoined: boolean,
-    isHost: boolean,
-    isDisconnected: boolean,
-    roomName: string
+    mode: modeType
 };
 
 interface globalSettingsCTXInterface {
