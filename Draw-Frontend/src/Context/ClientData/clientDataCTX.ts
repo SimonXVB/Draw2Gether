@@ -1,11 +1,19 @@
 import { createContext, type Dispatch, type SetStateAction } from "react";
 
+interface clientsInterface {
+    username: string,
+    isHost: boolean,
+    id: string
+};
+
 export interface clientDataInterface {
     isJoined: boolean,
     isDisconnected: boolean,
+    isHost: boolean,
     roomName: string,
     username: string,
-    clients: string[]
+    password: string,
+    clients: clientsInterface[]
 };
 
 interface clientDataCTXInterface {

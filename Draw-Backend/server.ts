@@ -26,12 +26,15 @@ io.on("connection", (socket) => {
                 socket.data.password = password;
                 socket.data.roomName = sockets[0].data.roomName;
                 socket.data.username = input.username;
+                socket.data.isHost = false;
 
                 const updatedSockets = await io.in(input.roomName).fetchSockets();
 
                 io.to(socket.id).emit("joinedRoom", {
                     roomName: sockets[0].data.roomName,
                     username: input.username,
+                    password: sockets[0].data.password,
+                    isHost: false,
                     clients: filterClients(updatedSockets)
                 });
 
@@ -45,11 +48,18 @@ io.on("connection", (socket) => {
             socket.data.password = input.password;
             socket.data.roomName = input.roomName;
             socket.data.username = input.username;
+            socket.data.isHost = true;
 
             io.to(socket.id).emit("joinedRoom", {
                 roomName: input.roomName,
                 username: input.username,
-                clients: [input.username]
+                password: input.password,
+                isHost: true,
+                clients: [{
+                    username: input.username,
+                    isHost: true,
+                    id: socket.id
+                }]
             });
         };
     });
@@ -84,24 +94,47 @@ io.on("connection", (socket) => {
         socket.broadcast.to(socket.data.roomName).emit("receiveRedo");
     });
 
+    //Kick user
+    socket.on("kickUserHost", async (id: string) => {
+        const sockets = await io.in(socket.data.roomName).fetchSockets();
+        const userToKick = sockets.filter(socket => socket.id === id)[0];
+
+        io.to(userToKick.id).emit("kickUserClient");
+        io.to(socket.data.roomName).emit("userKicked", userToKick.data.username);
+    });
+
     //Leave room
     socket.on("leaveRoom", async () => {
         socket.leave(socket.data.roomName);
 
         const sockets = await io.in(socket.data.roomName).fetchSockets();
+
+        if(socket.data.isHost && sockets.length > 0) {
+            sockets[0].data.isHost = true;
+            io.to(sockets[0].id).emit("hostChange");
+        };
+
         io.to(socket.data.roomName).emit("clientLeave", filterClients(sockets));
 
         socket.data.password = "";
         socket.data.roomName = "";
+        socket.data.isHost = false;
     });
 
     //General disconnect function
     socket.on("disconnect", async () => {
         const sockets = await io.in(socket.data.roomName).fetchSockets();
+
+        if(socket.data.isHost && sockets.length > 0) {
+            sockets[0].data.isHost = true;
+            io.to(sockets[0].id).emit("hostChange");
+        };
+
         io.to(socket.data.roomName).emit("clientLeave", filterClients(sockets));
 
         socket.data.password = "";
         socket.data.roomName = "";
+        socket.data.isHost = false;
     });
 });
 

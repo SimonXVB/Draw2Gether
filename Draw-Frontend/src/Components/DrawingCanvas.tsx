@@ -4,6 +4,7 @@ import { usePanCanvas } from "../Hooks/usePanCanvas";
 import { useZoomCanvas } from "../Hooks/useZoomCanvas";
 import { useDrawOnCanvas } from "../Hooks/useDrawOnCanvas";
 import { Toolbar } from "./Toolbar";
+import { MenuModal } from "./Individuals/MenuModal";
 import { globalSettingsCTX } from "../Context/GlobalSettingsContext/globalSettingsCTX";
 import { coordsCTX } from "../Context/CoordsContext/coordsCTX";
 import { drawingCTX, type drawingInterface } from "../Context/DrawingContext/drawingCTX";
@@ -82,19 +83,48 @@ export function DrawingCanvas() {
                 ...prev,
                 isJoined: false,
                 isDisconnected: true,
+                isHost: false,
                 roomName: "",
+                password: "",
                 clients: []
             }
         });
     };
 
-    function setNewClients(clients: string[]) {
+    function setNewClients(clients: []) {
         setClientData(prev => {
             return {
                 ...prev,
                 clients: clients
             }
         });
+    };
+
+    function setHost() {
+        setClientData(prev => {
+            return {
+                ...prev,
+                isHost: true
+            }
+        });
+    };
+
+    function leaveRoom() {
+        drawingInfoRef.current = [];
+        redoArrRef.current = [];
+
+        setClientData(prev => {
+            return {
+                ...prev,
+                roomName: "",
+                password: "",
+                isJoined: false,
+                isHost: false,
+                clients: []
+            };
+        });
+
+        socket.emit("leaveRoom");
     };
 
     useEffect(() => {
@@ -111,6 +141,8 @@ export function DrawingCanvas() {
         socket.on("disconnect", setDisconnect);
         socket.on("clientJoined", setNewClients);
         socket.on("clientLeave", setNewClients);
+        socket.on("hostChange", setHost);
+        socket.on("kickUserClient", leaveRoom);
 
         return () => {
             initialEmitRef.current = false;
@@ -121,6 +153,7 @@ export function DrawingCanvas() {
             socket.off("disconnect", setDisconnect);
             socket.off("clientJoined", setNewClients);
             socket.off("clientLeave", setNewClients);
+            socket.off("hostChange", setHost);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -139,6 +172,7 @@ export function DrawingCanvas() {
                 onTouchMove={e => isDrawing && touchDrawOnCanvas(e, canvasRef.current!)}
             ></canvas>
             <div ref={cursorRef} className="fixed hidden rounded-full pointer-events-none z-10"></div>
+            <MenuModal/>
         </>
     )
 };

@@ -22,12 +22,14 @@ export function JoinPage() {
         });
     };
 
-    function setIsJoined(data: { roomName: string, username: string, clients: string[] }) {
+    function setIsJoined(data: { roomName: string, username: string, password: string, isHost: boolean, clients: [] }) {
         setClientData(prev => ({
             ...prev,
             isJoined: true,
+            isHost: data.isHost,
             roomName: data.roomName,
             username: data.username,
+            password: data.password,
             clients: data.clients
         }));
     };
@@ -46,7 +48,7 @@ export function JoinPage() {
         socket.on("joinedRoom", setIsJoined);
 
         return () => {
-            socket.off("emptyInputs", setGeneralError);
+            socket.off("joinError", setGeneralError);
             socket.off("joinedRoom", setIsJoined);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps

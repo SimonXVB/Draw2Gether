@@ -1,14 +1,10 @@
 import { useContext, useEffect } from "react"
 import { globalSettingsCTX } from "../Context/GlobalSettingsContext/globalSettingsCTX"
-import { clientDataCTX } from "../Context/ClientData/clientDataCTX";
-import { drawingCTX } from "../Context/DrawingContext/drawingCTX";
 import { useUndoRedo } from "../Hooks/useUndoRedo";
 import { socket } from "../socket";
 
 export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement | null> }) {
     const { globalSettings, setGlobalSettings } = useContext(globalSettingsCTX);
-    const { clientData, setClientData } = useContext(clientDataCTX);
-    const { drawingInfoRef, redoArrRef } = useContext(drawingCTX);
     const { undo, redo } = useUndoRedo();
 
     function setColor(e: React.ChangeEvent<HTMLInputElement>) {
@@ -48,22 +44,6 @@ export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement 
         redo(canvas.current!);
     };
 
-    function leaveRoom() {
-        drawingInfoRef.current = [];
-        redoArrRef.current = [];
-
-        setClientData(prev => {
-            return {
-                ...prev,
-                roomName: "",
-                isJoined: false,
-                clients: []
-            };
-        });
-
-        socket.emit("leaveRoom");
-    };
-
     useEffect(() => {
         const callUndo = () => undo(canvas.current!);
         const callRedo = () => redo(canvas.current!);
@@ -77,7 +57,6 @@ export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement 
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
 
     return (
         <div className="fixed flex items-center top-0 left-0 w-screen p-3 font-[DynaPuff] bg-red-400/50 backdrop-blur-md gap-2">
@@ -111,8 +90,6 @@ export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement 
                     </svg>
                 </button>
             </div>
-            <h1>{clientData.username}</h1>
-            <button onClick={leaveRoom}>Leave Room</button>
         </div>
     )
 };
