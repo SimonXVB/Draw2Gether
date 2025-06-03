@@ -10,6 +10,7 @@ export interface clientDataInterface {
     isJoined: boolean,
     isDisconnected: boolean,
     isHost: boolean,
+    isKicked: boolean,
     roomName: string,
     username: string,
     password: string,

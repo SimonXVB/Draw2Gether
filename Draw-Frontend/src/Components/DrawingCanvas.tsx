@@ -5,8 +5,6 @@ import { useZoomCanvas } from "../Hooks/useZoomCanvas";
 import { useDrawOnCanvas } from "../Hooks/useDrawOnCanvas";
 import { Toolbar } from "./Toolbar";
 import { MenuModal } from "./Individuals/MenuModal";
-import { globalSettingsCTX } from "../Context/GlobalSettingsContext/globalSettingsCTX";
-import { coordsCTX } from "../Context/CoordsContext/coordsCTX";
 import { drawingCTX, type drawingInterface } from "../Context/DrawingContext/drawingCTX";
 import { clientDataCTX } from "../Context/ClientData/clientDataCTX";
 import { socket } from "../socket";
@@ -17,9 +15,8 @@ export function DrawingCanvas() {
     const initialEmitRef = useRef<boolean>(true);
     
     const [isDrawing, setIsDrawing] = useState<boolean>(false);
+    const [menuOpen, setMenuOpen] = useState(false);
 
-    const { scale } = useContext(coordsCTX);
-    const { globalSettings } = useContext(globalSettingsCTX);
     const { drawingInfoRef, redoArrRef } = useContext(drawingCTX);
     const { setClientData } = useContext(clientDataCTX);
 
@@ -28,26 +25,7 @@ export function DrawingCanvas() {
     const { addZoomListeners } = useZoomCanvas();
     const { mouseDrawOnCanvas, touchDrawOnCanvas, stopDrawing } = useDrawOnCanvas();
 
-    function mouseCursor(e: React.MouseEvent) {
-        const cursor = cursorRef.current!;
-
-        cursor.style.display = "block";
-        cursor.style.width = (globalSettings.size * scale) + "px";
-        cursor.style.height = (globalSettings.size * scale) + "px";
-        cursor.style.border = "1px solid" + globalSettings.color;
-
-        cursor.style.top = (e.clientY - ((globalSettings.size * scale) / 2)) + "px";
-        cursor.style.left = (e.clientX - ((globalSettings.size * scale) / 2)) + "px";
-    };
-
-    function addMouseMoveListeners(e: React.MouseEvent<HTMLCanvasElement>) {
-        if(isDrawing) {
-            mouseDrawOnCanvas(e, canvasRef.current!);
-        };
-        mouseCursor(e);
-    };
-
-    function stopDraw() {
+    function setStopDrawing() {
         if(isDrawing) {
             stopDrawing(canvasRef.current!);
             setIsDrawing(false);
@@ -109,7 +87,7 @@ export function DrawingCanvas() {
         });
     };
 
-    function leaveRoom() {
+    function kickUserClient() {
         drawingInfoRef.current = [];
         redoArrRef.current = [];
 
@@ -120,6 +98,7 @@ export function DrawingCanvas() {
                 password: "",
                 isJoined: false,
                 isHost: false,
+                isKicked: true,
                 clients: []
             };
         });
@@ -142,7 +121,7 @@ export function DrawingCanvas() {
         socket.on("clientJoined", setNewClients);
         socket.on("clientLeave", setNewClients);
         socket.on("hostChange", setHost);
-        socket.on("kickUserClient", leaveRoom);
+        socket.on("kickUserClient", kickUserClient);
 
         return () => {
             initialEmitRef.current = false;
@@ -154,25 +133,25 @@ export function DrawingCanvas() {
             socket.off("clientJoined", setNewClients);
             socket.off("clientLeave", setNewClients);
             socket.off("hostChange", setHost);
+            socket.off("kickUserClient", kickUserClient);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
         <>
-            <Toolbar canvas={canvasRef}/>
-            <canvas ref={ref => {canvasRef.current = ref}} width={window.innerWidth} height={window.innerHeight} className="outline-2 outline-red-500 cursor-none"
+            <Toolbar canvas={canvasRef} setMenuOpen={setMenuOpen}/>
+            <canvas ref={ref => {canvasRef.current = ref}} width={window.innerWidth} height={window.innerHeight} className="outline-2 outline-red-500"
                 onMouseDown={e => e.button === 0 && setIsDrawing(true)}
-                onMouseUp={stopDraw}
-                onMouseMove={e => addMouseMoveListeners(e)}
+                onMouseUp={setStopDrawing}
+                onMouseMove={e => isDrawing && mouseDrawOnCanvas(e, canvasRef.current!)}
                 onMouseOut={() => cursorRef.current!.style.display = "none"}
 
                 onTouchStart={e => e.touches.length === 1 && setIsDrawing(true)}
                 onTouchEnd={() => {stopDrawing(canvasRef.current!); setIsDrawing(false)}}
                 onTouchMove={e => isDrawing && touchDrawOnCanvas(e, canvasRef.current!)}
             ></canvas>
-            <div ref={cursorRef} className="fixed hidden rounded-full pointer-events-none z-10"></div>
-            <MenuModal/>
+            {menuOpen && <MenuModal setMenuOpen={setMenuOpen}/>}
         </>
     )
 };

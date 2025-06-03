@@ -1,9 +1,9 @@
-import { useContext, useEffect } from "react"
+import { useContext, useEffect, type Dispatch, type SetStateAction } from "react"
 import { globalSettingsCTX } from "../Context/GlobalSettingsContext/globalSettingsCTX"
 import { useUndoRedo } from "../Hooks/useUndoRedo";
 import { socket } from "../socket";
 
-export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement | null> }) {
+export function Toolbar({ canvas, setMenuOpen }: { canvas: React.RefObject<HTMLCanvasElement | null>, setMenuOpen: Dispatch<SetStateAction<boolean>> }) {
     const { globalSettings, setGlobalSettings } = useContext(globalSettingsCTX);
     const { undo, redo } = useUndoRedo();
 
@@ -60,6 +60,11 @@ export function Toolbar({ canvas }: { canvas: React.RefObject<HTMLCanvasElement 
 
     return (
         <div className="fixed flex items-center top-0 left-0 w-screen p-3 font-[DynaPuff] bg-red-400/50 backdrop-blur-md gap-2">
+            <button className="flex justify-center cursor-pointer bg-red-400 outline-2 outline-red-400 p-3 rounded-md hover:bg-white hover:*:fill-red-400" onClick={() => setMenuOpen(true)}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#fff" viewBox="0 0 16 16">
+                    <path fillRule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                </svg>
+            </button>
             <input type="color" className="cursor-pointer" onChange={e => setColor(e)}/>
             <div className="flex justify-between items-center gap-2 w-[300px]">
                 <input type="range" min={1} max={500} step={1} defaultValue={globalSettings.size} onChange={e => setSize(e)} className="w-[80%] cursor-pointer"/>

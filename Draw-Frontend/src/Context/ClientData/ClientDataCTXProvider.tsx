@@ -6,6 +6,7 @@ export function ClientDataCTXProvider({children}: {children: React.ReactNode}) {
         isJoined: false,
         isDisconnected: false,
         isHost: false,
+        isKicked: false,
         roomName: "",
         username: "",
         password: "",

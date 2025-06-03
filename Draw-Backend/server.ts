@@ -8,7 +8,39 @@ const io = new Server({
 });
 
 io.on("connection", (socket) => {
-    //Join room function
+    //Join/Create room
+    socket.on("createRoom", async (input) => {
+        if(input.roomName === "" || input.password === "" || input.username === "") {
+            io.to(socket.id).emit("joinError", "empty");
+            return;
+        };
+
+        const sockets = await io.in(input.roomName).fetchSockets();
+
+        if(!sockets[0]) {
+            socket.join(input.roomName);
+
+            socket.data.password = input.password;
+            socket.data.roomName = input.roomName;
+            socket.data.username = input.username;
+            socket.data.isHost = true;
+
+            io.to(socket.id).emit("joinedRoom", {
+                roomName: input.roomName,
+                username: input.username,
+                password: input.password,
+                isHost: true,
+                clients: [{
+                    username: input.username,
+                    isHost: true,
+                    id: socket.id
+                }]
+            });
+        } else {
+            io.to(socket.id).emit("joinError", "roomExists");
+        };
+    });
+
     socket.on("joinRoom", async (input) => {
         if(input.roomName === "" || input.password === "" || input.username === "") {
             io.to(socket.id).emit("joinError", "empty");
@@ -43,24 +75,7 @@ io.on("connection", (socket) => {
                 io.to(socket.id).emit("joinError", "password");
             };
         } else {
-            socket.join(input.roomName);
-
-            socket.data.password = input.password;
-            socket.data.roomName = input.roomName;
-            socket.data.username = input.username;
-            socket.data.isHost = true;
-
-            io.to(socket.id).emit("joinedRoom", {
-                roomName: input.roomName,
-                username: input.username,
-                password: input.password,
-                isHost: true,
-                clients: [{
-                    username: input.username,
-                    isHost: true,
-                    id: socket.id
-                }]
-            });
+            io.to(socket.id).emit("joinError", "roomNotExists");
         };
     });
 
@@ -96,6 +111,8 @@ io.on("connection", (socket) => {
 
     //Kick user
     socket.on("kickUserHost", async (id: string) => {
+        if(!socket.data.isHost) return;
+
         const sockets = await io.in(socket.data.roomName).fetchSockets();
         const userToKick = sockets.filter(socket => socket.id === id)[0];
 

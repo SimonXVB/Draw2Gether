@@ -1,5 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { clientDataCTX } from "../Context/ClientData/clientDataCTX";
+import { ErrorPopup } from "./Individuals/ErrorPopup";
 import { socket } from "../socket";
 
 export function JoinPage() {
@@ -9,8 +10,25 @@ export function JoinPage() {
     const [passwordInput, setPasswordInput] = useState<string>("");
     const [usernameInput, setUsernameInput] = useState<string>(clientData.username);
     const [error, setError] = useState<string>("");
+    const [activeTab, setActiveTab] = useState<"join" | "create">("join");
 
     const errorTimeoutRef = useRef<number>(0);
+    const errorObj = {
+        "empty": "One or more fields are empty",
+        "password": "Incorrect Password",
+        "roomNotExists": "A Room with this name doesn't exist",
+        "roomExists": "A room with this name already exists"
+    };
+
+    function createRoom(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+
+        socket.emit("createRoom", {
+            roomName: roomInput,
+            password: passwordInput,
+            username: usernameInput
+        });
+    };
 
     function joinRoom(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -55,18 +73,41 @@ export function JoinPage() {
     }, []);
 
     return (
-        <div className="flex flex-col justify-center items-center h-screen">
-            <h1 className="text-5xl font-black mb-8">Join Page</h1>
-            <form onSubmit={e => joinRoom(e)}>
-                <input type="text" placeholder="Input username" onChange={e => setUsernameInput(e.target.value)} defaultValue={clientData.username} className="w-full"/>
-                <div>
-                    <input type="text" placeholder="Input room name" onChange={e => setRoomInput(e.target.value)}/>
-                    <input type="text" placeholder="Input password" onChange={e => setPasswordInput(e.target.value)}/>
+        <div className="flex flex-col justify-center items-center h-screen gap-8">
+            <h1 className="text-5xl font-black">
+                <span className="text-blue-400">Draw</span>
+                <span>2</span>
+                <span className="text-red-400">Gether</span>
+            </h1>
+            <div>
+                <form onSubmit={e => activeTab === "join" ? joinRoom(e) : createRoom(e)} className={`mb-4 rounded-md p-10 transition-all duration-300 shadow-xl shadow-gray-400 ${activeTab === "join" ? "bg-blue-400" : "bg-red-400"}`}>
+                    <div className="text-white font-bold mb-8">
+                        <div className="text-2xl">Username</div>
+                        <input onChange={e => setUsernameInput(e.target.value)} defaultValue={clientData.username} className="px-1 border-2 border-white rounded-md"/>
+                    </div>
+                    <div className="text-white font-bold mb-2">
+                        <div>Room Name</div>
+                        <input onChange={e => setRoomInput(e.target.value)} className="px-1 border-2 border-white rounded-md"/>
+                    </div>
+                    <div className="text-white font-bold">
+                        <div>Password</div>
+                        <input onChange={e => setPasswordInput(e.target.value)} className="px-1 border-2 border-white rounded-md"/>
+                    </div>
+                    <button type="submit" className={`mt-4 font-black w-full rounded-md py-1 bg-white cursor-pointer hover:bg-gray-100 hover:scale-110 transition-all duration-300 ${activeTab === "join" ? "text-blue-400" : "text-red-400"}`}>{activeTab === "join" ? "Join Room" : "Create Room"}</button>
+                </form>
+                <div className={`${error ? "opacity-100" : "opacity-0"} text-center font-black text-red-400 h-6`}>{errorObj[error as keyof typeof errorObj]}</div>
+            </div>
+            <div className="flex items-center gap-4">
+                <h1 className={`text-2xl font-black transition-all duration-300 ${activeTab === "join" && "scale-125 text-blue-400"}`}>Join</h1>
+                <div id="toggleSwitchContainer">
+                    <label htmlFor="check">
+                        <input type="checkbox" name="check" id="check" onClick={(e) => setActiveTab(e.currentTarget.checked ? "create" : "join")}/>
+                        <div id="toggle"></div>
+                    </label>
                 </div>
-                <button type="submit">Join Room</button>
-            </form>
-            {error === "password" && <div>Incorrect Password</div>}
-            {error === "empty" && <div>One or more fields are empty</div>}
+                <h1 className={`text-2xl font-black transition-all duration-300 ${activeTab === "create" && "scale-125 text-red-400"}`}>Create</h1>
+            </div>
+            <ErrorPopup/>
         </div>
     );
 };
