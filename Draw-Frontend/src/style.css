@@ -15,7 +15,7 @@ body {
   }
 }
 
-/*Toggle Switch used in /Components/JoinPage.tsx*/
+/*Toggle Switch*/
 #toggleSwitchContainer {
   position: relative;
   border: 3px solid #51a2ff;
@@ -55,3 +55,92 @@ body {
   transform: translateX(100%);
 }
 /*Toggle Switch*/
+
+/*Text Flip*/
+.flip-container {
+  transition: 600ms;
+  transform-style: preserve-3d;
+}
+
+.front {
+  backface-visibility: hidden;
+  transform: rotateX(0deg);
+  top: 0;
+  left: 0;
+}
+
+.back {
+  backface-visibility: hidden;
+  transform: rotateX(180deg);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.flip {
+  transform: rotateX(180deg) translateX(-1ch);
+}
+/*Text Flip*/
+
+/*Toolbar Color Input*/
+#toolbar-color {
+  height: 49px;
+  width: 49px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+#toolbar-color:hover {
+  outline: 2px solid white;
+}
+
+#toolbar-color::-moz-color-swatch {
+  border: none;
+}
+
+#toolbar-color::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 0;
+}
+
+#toolbar-color::-webkit-color-swatch {
+  border: none;
+}
+/*Toolbar Color Input*/
+
+/*Toolbar Range Input*/
+#toolbar-slider {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+#toolbar-slider::-webkit-slider-runnable-track {
+  background-color: white;
+  height: 8px;
+  border-radius: 6px;
+}
+
+#toolbar-slider::-moz-range-track {
+  background-color: white;
+  height: 8px;
+  border-radius: 6px;
+}
+
+#toolbar-slider::-webkit-slider-thumb {
+  appearance: none;
+  height: 30px;
+  width: 10px;
+  border: 0;
+  background-color: #ff6467;
+  border: 2px solid white;
+}
+
+#toolbar-slider::-moz-range-thumb {
+  appearance: none;
+  height: 30px;
+  width: 10px;
+  border: 0;
+  background-color: #ff6467;
+  border: 2px solid white;
+}
+/*Toolbar Range Input*/

@@ -5,17 +5,23 @@ import { useZoomCanvas } from "../Hooks/useZoomCanvas";
 import { useDrawOnCanvas } from "../Hooks/useDrawOnCanvas";
 import { Toolbar } from "./Toolbar";
 import { MenuModal } from "./Individuals/MenuModal";
+import { NotificationPopup } from "./Individuals/NotificationPopup";
 import { drawingCTX, type drawingInterface } from "../Context/DrawingContext/drawingCTX";
 import { clientDataCTX } from "../Context/ClientData/clientDataCTX";
 import { socket } from "../socket";
 
+export interface serverEventInterface {
+    event: string,
+    user: string
+}
+
 export function DrawingCanvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const cursorRef = useRef<HTMLDivElement>(null);
     const initialEmitRef = useRef<boolean>(true);
     
     const [isDrawing, setIsDrawing] = useState<boolean>(false);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [serverEvent, setServerEvent] = useState<serverEventInterface>({} as serverEventInterface);
 
     const { drawingInfoRef, redoArrRef } = useContext(drawingCTX);
     const { setClientData } = useContext(clientDataCTX);
@@ -52,6 +58,29 @@ export function DrawingCanvas() {
         render(canvasRef.current!);
     };
 
+    function setHost() {
+        setClientData(prev => {
+            return {
+                ...prev,
+                isHost: true
+            }
+        });
+    };
+
+    function setNewClients(data: { clients: [], user: string, event: string }) {
+        setClientData(prev => {
+            return {
+                ...prev,
+                clients: data.clients
+            }
+        });
+
+        setServerEvent({
+            event: data.event,
+            user: data.user
+        });
+    };
+
     function setDisconnect() {
         drawingInfoRef.current = [];
         redoArrRef.current = [];
@@ -65,24 +94,6 @@ export function DrawingCanvas() {
                 roomName: "",
                 password: "",
                 clients: []
-            }
-        });
-    };
-
-    function setNewClients(clients: []) {
-        setClientData(prev => {
-            return {
-                ...prev,
-                clients: clients
-            }
-        });
-    };
-
-    function setHost() {
-        setClientData(prev => {
-            return {
-                ...prev,
-                isHost: true
             }
         });
     };
@@ -102,8 +113,6 @@ export function DrawingCanvas() {
                 clients: []
             };
         });
-
-        socket.emit("leaveRoom");
     };
 
     useEffect(() => {
@@ -120,8 +129,9 @@ export function DrawingCanvas() {
         socket.on("disconnect", setDisconnect);
         socket.on("clientJoined", setNewClients);
         socket.on("clientLeave", setNewClients);
-        socket.on("hostChange", setHost);
+        socket.on("userKicked", setNewClients);
         socket.on("kickUserClient", kickUserClient);
+        socket.on("hostChange", setHost);
 
         return () => {
             initialEmitRef.current = false;
@@ -132,8 +142,9 @@ export function DrawingCanvas() {
             socket.off("disconnect", setDisconnect);
             socket.off("clientJoined", setNewClients);
             socket.off("clientLeave", setNewClients);
-            socket.off("hostChange", setHost);
+            socket.off("userKicked", setNewClients);
             socket.off("kickUserClient", kickUserClient);
+            socket.off("hostChange", setHost);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -145,13 +156,13 @@ export function DrawingCanvas() {
                 onMouseDown={e => e.button === 0 && setIsDrawing(true)}
                 onMouseUp={setStopDrawing}
                 onMouseMove={e => isDrawing && mouseDrawOnCanvas(e, canvasRef.current!)}
-                onMouseOut={() => cursorRef.current!.style.display = "none"}
 
                 onTouchStart={e => e.touches.length === 1 && setIsDrawing(true)}
                 onTouchEnd={() => {stopDrawing(canvasRef.current!); setIsDrawing(false)}}
                 onTouchMove={e => isDrawing && touchDrawOnCanvas(e, canvasRef.current!)}
             ></canvas>
-            {menuOpen && <MenuModal setMenuOpen={setMenuOpen}/>}
+            <MenuModal setMenuOpen={setMenuOpen} menuOpen={menuOpen}/>
+            <NotificationPopup setServerEvent={setServerEvent} serverEvent={serverEvent}/>
         </>
     )
 };

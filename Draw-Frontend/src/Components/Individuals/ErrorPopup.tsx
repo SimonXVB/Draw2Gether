@@ -21,9 +21,9 @@ export function ErrorPopup() {
     return (
         <>
         {(clientData.isKicked || clientData.isDisconnected) &&
-            <div className="fixed top-0 left-0 font-bold bg-red-400 px-2 py-1 m-2 rounded-md text-white shadow-xl shadow-gray-400">
+            <div className="fixed bottom-0 left-0 font-bold bg-red-400 px-2 py-1 rounded-tr-md text-white">
                 {clientData.isKicked && <div>You have been kicked!</div>}
-                {clientData.isDisconnected && <div>You have been disconnected!</div>}
+                {clientData.isDisconnected && <div>Connection to server lost!</div>}
             </div>
         }
         </>

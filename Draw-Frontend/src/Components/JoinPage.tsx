@@ -61,21 +61,35 @@ export function JoinPage() {
         }, 5000);
     };
 
+    function setDisconnect() {
+        setClientData(prev => {
+            return {
+                ...prev,
+                isDisconnected: true
+            }
+        });
+    };
+
     useEffect(() => {
         socket.on("joinError", setGeneralError);
         socket.on("joinedRoom", setIsJoined);
+        socket.on("connect_error", setDisconnect);
 
         return () => {
             socket.off("joinError", setGeneralError);
             socket.off("joinedRoom", setIsJoined);
+            socket.off("connect_error", setDisconnect);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
         <div className="flex flex-col justify-center items-center h-screen gap-8">
-            <h1 className="text-5xl font-black">
-                <span className="text-blue-400">Draw</span>
+            <h1 className="text-5xl font-black flex">
+                <span className={`text-blue-400 flip-container ${activeTab === "create" && "flip"}`}>
+                    <div className="front">Draw</div>
+                    <div className="back">Create</div>
+                </span>
                 <span>2</span>
                 <span className="text-red-400">Gether</span>
             </h1>
