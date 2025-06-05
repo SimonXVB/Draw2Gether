@@ -1,7 +1,7 @@
 import { useContext, type Dispatch, type SetStateAction } from "react"
 import { clientDataCTX } from "../../Context/ClientData/clientDataCTX"
-import { drawingCTX } from "../../Context/DrawingContext/drawingCTX"
-import { socket } from "../../socket"
+import { drawingCTX } from "../../Context/DrawingContext/drawingCTX";
+import { socket } from "../../socket";
 
 export function MenuModal({ setMenuOpen, menuOpen }: { setMenuOpen: Dispatch<SetStateAction<boolean>>, menuOpen: boolean }) {
     const { setClientData, clientData } = useContext(clientDataCTX);

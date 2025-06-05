@@ -71,7 +71,7 @@ io.on("connection", (socket) => {
                     clients: filterClients(updatedSockets)
                 });
 
-                io.to(sockets[0].data.roomName).emit("clientJoined", {
+                io.to(sockets[0].data.roomName).emit("roomEvent", {
                     clients: filterClients(updatedSockets),
                     user: input.username,
                     event: "joined"
@@ -122,7 +122,7 @@ io.on("connection", (socket) => {
         const userToKick = sockets.filter(socket => socket.id === id)[0];
 
         io.to(userToKick.id).emit("kickUserClient");
-        io.to(sockets[0].data.roomName).emit("userKicked", {
+        io.to(sockets[0].data.roomName).emit("roomEvent", {
             clients: filterClients(sockets),
             user: socket.data.username,
             event: "kicked"
@@ -144,7 +144,7 @@ io.on("connection", (socket) => {
             io.to(sockets[0].id).emit("hostChange");
         };
 
-        io.to(socket.data.roomName).emit("clientLeave", {
+        io.to(socket.data.roomName).emit("roomEvent", {
             clients: filterClients(sockets),
             user: socket.data.username,
             event: "left"
@@ -164,10 +164,10 @@ io.on("connection", (socket) => {
             io.to(sockets[0].id).emit("hostChange");
         };
 
-        io.to(socket.data.roomName).emit("clientLeave", {
+        io.to(socket.data.roomName).emit("roomEvent", {
             clients: filterClients(sockets),
             user: socket.data.username,
-            event: "left"
+            event: "disconnected"
         });
 
         socket.data.password = "";

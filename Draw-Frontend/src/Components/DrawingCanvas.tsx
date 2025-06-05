@@ -13,7 +13,7 @@ import { socket } from "../socket";
 export interface serverEventInterface {
     event: string,
     user: string
-}
+};
 
 export function DrawingCanvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -21,7 +21,7 @@ export function DrawingCanvas() {
     
     const [isDrawing, setIsDrawing] = useState<boolean>(false);
     const [menuOpen, setMenuOpen] = useState(false);
-    const [serverEvent, setServerEvent] = useState<serverEventInterface>({} as serverEventInterface);
+    const [roomEvent, setRoomEvent] = useState<serverEventInterface>({} as serverEventInterface);
 
     const { drawingInfoRef, redoArrRef } = useContext(drawingCTX);
     const { setClientData } = useContext(clientDataCTX);
@@ -75,13 +75,13 @@ export function DrawingCanvas() {
             }
         });
 
-        setServerEvent({
+        setRoomEvent({
             event: data.event,
             user: data.user
         });
     };
 
-    function setDisconnect() {
+    function RoomDisconnect() {
         drawingInfoRef.current = [];
         redoArrRef.current = [];
         
@@ -126,10 +126,8 @@ export function DrawingCanvas() {
         socket.on("initialDataRequestHost", sendInitialDataHost);
         socket.on("receiveInitialData", setInitialData);
         socket.on("receiveNewData", setNewData);
-        socket.on("disconnect", setDisconnect);
-        socket.on("clientJoined", setNewClients);
-        socket.on("clientLeave", setNewClients);
-        socket.on("userKicked", setNewClients);
+        socket.on("disconnect", RoomDisconnect);
+        socket.on("roomEvent", setNewClients);
         socket.on("kickUserClient", kickUserClient);
         socket.on("hostChange", setHost);
 
@@ -139,10 +137,8 @@ export function DrawingCanvas() {
             socket.off("initialDataRequestHost", sendInitialDataHost);
             socket.off("receiveInitialData", setInitialData);
             socket.off("receiveNewData", setNewData);
-            socket.off("disconnect", setDisconnect);
-            socket.off("clientJoined", setNewClients);
-            socket.off("clientLeave", setNewClients);
-            socket.off("userKicked", setNewClients);
+            socket.off("disconnect", RoomDisconnect);
+            socket.off("roomEvent", setNewClients);
             socket.off("kickUserClient", kickUserClient);
             socket.off("hostChange", setHost);
         };
@@ -162,7 +158,7 @@ export function DrawingCanvas() {
                 onTouchMove={e => isDrawing && touchDrawOnCanvas(e, canvasRef.current!)}
             ></canvas>
             <MenuModal setMenuOpen={setMenuOpen} menuOpen={menuOpen}/>
-            <NotificationPopup setServerEvent={setServerEvent} serverEvent={serverEvent}/>
+            <NotificationPopup setRoomEvent={setRoomEvent} roomEvent={roomEvent}/>
         </>
     )
 };

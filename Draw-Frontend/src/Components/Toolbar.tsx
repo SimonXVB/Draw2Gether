@@ -84,7 +84,7 @@ export function Toolbar({ canvas, setMenuOpen }: { canvas: React.RefObject<HTMLC
                         </svg>
                     }
                 </button>
-                <div className="flex gap-2 *:bg-red-400 *:outline-2 *:outline-red-400 *:p-3 *:rounded-md *:w-full *:cursor-pointer *:hover:bg-white">
+                <div className="flex gap-2 *:bg-red-400 *:p-3 *:rounded-md *:w-full *:cursor-pointer *:hover:bg-white">
                     <button onClick={undoDrawing} className="hover:*:fill-red-400">
                         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#fff" viewBox="0 0 16 16">
                             <path fillRule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z"/>
