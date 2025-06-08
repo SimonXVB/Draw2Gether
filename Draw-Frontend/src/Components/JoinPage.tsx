@@ -5,29 +5,19 @@ import { socket } from "../socket";
 
 export function JoinPage() {
     const { setClientData, clientData } = useContext(clientDataCTX);
+    const errorTimeoutRef = useRef<number>(0);
 
     const [usernameInput, setUsernameInput] = useState<string>(clientData.username);
     const [roomInput, setRoomInput] = useState<string>("");
     const [passwordInput, setPasswordInput] = useState<string>("");
+
     const [error, setError] = useState<string>("");
     const [activeTab, setActiveTab] = useState<"join" | "create">("join");
 
-    const errorTimeoutRef = useRef<number>(0);
-
-    function createRoom(e: React.FormEvent<HTMLFormElement>) {
+    function joinRoom(e: React.FormEvent<HTMLFormElement>, type: "joinRoom" | "createRoom") {
         e.preventDefault();
 
-        socket.emit("createRoom", {
-            roomName: roomInput,
-            password: passwordInput,
-            username: usernameInput
-        });
-    };
-
-    function joinRoom(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-
-        socket.emit("joinRoom", {
+        socket.emit(type, {
             roomName: roomInput,
             password: passwordInput,
             username: usernameInput
@@ -88,7 +78,7 @@ export function JoinPage() {
                 <span className="text-red-400">Gether</span>
             </h1>
             <div>
-                <form onSubmit={e => activeTab === "join" ? joinRoom(e) : createRoom(e)} className={`mb-4 text-white font-bold rounded-md p-10 transition-all duration-300 shadow-xl shadow-gray-400 ${activeTab === "join" ? "bg-blue-400" : "bg-red-400"}`}>
+                <form onSubmit={e => activeTab === "join" ? joinRoom(e, "joinRoom") : joinRoom(e, "createRoom")} className={`mb-4 text-white font-bold rounded-md p-10 transition-all duration-300 shadow-xl shadow-gray-400 ${activeTab === "join" ? "bg-blue-400" : "bg-red-400"}`}>
                     <div className="mb-8">
                         <div className="text-2xl">Username</div>
                         <input onChange={e => setUsernameInput(e.target.value)} defaultValue={usernameInput} className="px-1 border-2 border-white rounded-md"/>

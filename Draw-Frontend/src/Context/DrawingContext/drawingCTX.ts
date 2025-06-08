@@ -13,7 +13,8 @@ export interface drawingInterface {
 
 interface drawingCTXInterface {
     drawingInfoRef: React.RefObject<drawingInterface[]>,
-    redoArrRef: React.RefObject<drawingInterface[]>
+    redoArrRef: React.RefObject<drawingInterface[]>,
+    canvasRef: React.RefObject<HTMLCanvasElement | null>
 };
 
 export const drawingCTX = createContext<drawingCTXInterface>({} as drawingCTXInterface);

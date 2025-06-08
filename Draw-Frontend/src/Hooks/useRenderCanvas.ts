@@ -4,13 +4,13 @@ import { drawingCTX } from "../Context/DrawingContext/drawingCTX";
 
 export function useRenderCanvas() {
     const coordsContext = useContext(coordsCTX);
-    const { drawingInfoRef } = useContext(drawingCTX);
+    const { drawingInfoRef, canvasRef } = useContext(drawingCTX);
 
-    function render(canvas: HTMLCanvasElement) {
-        const ctx = canvas.getContext("2d")!;
+    function render() {
+        const ctx = canvasRef.current!.getContext("2d")!;
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
         ctx.setTransform(coordsContext.scale, 0, 0, coordsContext.scale, coordsContext.x, coordsContext.y);
 
         ctx.fillStyle = "#1ee825";
@@ -26,7 +26,7 @@ export function useRenderCanvas() {
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
 
-            drawing.coords.forEach(coord => {                          
+            drawing.coords.forEach(coord => {
                 ctx.lineTo(coord.x, coord.y);
             });
 

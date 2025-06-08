@@ -1,11 +1,17 @@
 import { useContext, useEffect, type Dispatch, type SetStateAction } from "react"
 import { globalSettingsCTX } from "../Context/GlobalSettingsContext/globalSettingsCTX"
 import { useUndoRedo } from "../Hooks/useUndoRedo";
+import { type drawingInterface } from "../Context/DrawingContext/drawingCTX";
+import { useRenderCanvas } from "../Hooks/useRenderCanvas";
+import { drawingCTX } from "../Context/DrawingContext/drawingCTX";
 import { socket } from "../socket";
 
-export function Toolbar({ canvas, setMenuOpen }: { canvas: React.RefObject<HTMLCanvasElement | null>, setMenuOpen: Dispatch<SetStateAction<boolean>> }) {
+export function Toolbar({ setMenuOpen }: { setMenuOpen: Dispatch<SetStateAction<boolean>> }) {
     const { globalSettings, setGlobalSettings } = useContext(globalSettingsCTX);
+    const { drawingInfoRef, redoArrRef } = useContext(drawingCTX);
+
     const { undo, redo } = useUndoRedo();
+    const { render } = useRenderCanvas();
 
     function setColor(e: React.ChangeEvent<HTMLInputElement>) {
         setGlobalSettings(prev => {
@@ -34,26 +40,29 @@ export function Toolbar({ canvas, setMenuOpen }: { canvas: React.RefObject<HTMLC
         });
     };
 
-    function undoDrawing() {
+    function sendUndo() {
         socket.emit("sendUndo");
-        undo(canvas.current!);
+        undo();
     };
 
-    function redoDrawing() {
+    function sendRedo() {
         socket.emit("sendRedo");
-        redo(canvas.current!);
+        redo();
+    };
+
+    function setNewDrawingData(data: { drawingData: drawingInterface[], redoData: drawingInterface[] }) {
+        drawingInfoRef.current = data.drawingData;
+        redoArrRef.current = data.redoData;
+        render();
     };
 
     useEffect(() => {
-        const callUndo = () => undo(canvas.current!);
-        const callRedo = () => redo(canvas.current!);
-
-        socket.on("receiveUndo", callUndo);
-        socket.on("receiveRedo", callRedo);
+        socket.on("receiveUndo", setNewDrawingData);
+        socket.on("receiveRedo", setNewDrawingData);
 
         return () => {
-            socket.off("receiveUndo", callUndo);
-            socket.off("receiveRedo", callRedo);
+            socket.off("receiveUndo", setNewDrawingData);
+            socket.off("receiveRedo", setNewDrawingData);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -85,13 +94,13 @@ export function Toolbar({ canvas, setMenuOpen }: { canvas: React.RefObject<HTMLC
                     }
                 </button>
                 <div className="flex gap-2 *:bg-red-400 *:p-3 *:rounded-md *:w-full *:cursor-pointer *:hover:bg-white">
-                    <button onClick={undoDrawing} className="hover:*:fill-red-400">
+                    <button onClick={sendUndo} className="hover:*:fill-red-400">
                         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#fff" viewBox="0 0 16 16">
                             <path fillRule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z"/>
                             <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466"/>
                         </svg>
                     </button>
-                    <button onClick={redoDrawing} className="hover:*:fill-red-400">
+                    <button onClick={sendRedo} className="hover:*:fill-red-400">
                         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#fff" viewBox="0 0 16 16">
                             <path fillRule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
                             <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>

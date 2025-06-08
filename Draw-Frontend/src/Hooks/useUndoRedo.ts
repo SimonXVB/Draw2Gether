@@ -6,24 +6,24 @@ export function useUndoRedo() {
     const { drawingInfoRef, redoArrRef } = useContext(drawingCTX);
     const { render } = useRenderCanvas();
 
-    function undo(canvas: HTMLCanvasElement) {
+    function undo() {
         const undoEl = drawingInfoRef.current.pop();
 
         if(!undoEl) return;
 
         redoArrRef.current.push(undoEl);
 
-        render(canvas);
+        render();
     };
 
-    function redo(canvas: HTMLCanvasElement) {
+    function redo() {
         const redoEl = redoArrRef.current.pop();
 
         if(!redoEl) return;
 
         drawingInfoRef.current.push(redoEl);
 
-        render(canvas);
+        render();
     };
 
     return { undo, redo };

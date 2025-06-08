@@ -7,9 +7,23 @@ const io = new Server({
     }
 });
 
-io.on("connection", (socket) => {
+interface dataInterface {
+    color: string,
+    size: number,
+    coords: []
+};
+
+interface roomsInterface {
+    roomName: string,
+    drawingData: dataInterface[],
+    redoData: dataInterface[]
+};
+
+const rooms: roomsInterface[] = [];
+
+io.on("connection", socket => {
     //Create room
-    socket.on("createRoom", async (input) => {
+    socket.on("createRoom", async input => {
         if(input.roomName === "" || input.password === "" || input.username === "") {
             io.to(socket.id).emit("joinError", "empty");
             return;
@@ -24,6 +38,12 @@ io.on("connection", (socket) => {
             socket.data.roomName = input.roomName;
             socket.data.username = input.username;
             socket.data.isHost = true;
+
+            rooms.push({
+                roomName: input.roomName,
+                drawingData: [],
+                redoData: []
+            });
 
             io.to(socket.id).emit("joinedRoom", {
                 roomName: input.roomName,
@@ -42,7 +62,7 @@ io.on("connection", (socket) => {
     });
 
     //Join room
-    socket.on("joinRoom", async (input) => {
+    socket.on("joinRoom", async input => {
         if(input.roomName === "" || input.password === "" || input.username === "") {
             io.to(socket.id).emit("joinError", "empty");
             return;
@@ -84,34 +104,50 @@ io.on("connection", (socket) => {
         };
     });
 
-    //Send initial data to client from host
-    socket.on("initialDataReqClient", async () => {
-        const sockets = await io.in(socket.data.roomName).fetchSockets();
+    //Get initial data
+    socket.on("getInitialData", cb => {
+        const room = rooms.find(room => room.roomName === socket.data.roomName)!;
 
-        io.to(sockets[0].id).emit("initialDataRequestHost");
-    });
-
-    socket.on("sendInitialDataHost", async data => {
-        const sockets = await io.in(socket.data.roomName).fetchSockets();
-
-        socket.to(sockets[sockets.length - 1].id).emit("receiveInitialData", {
-            drawingInfo: data.drawingInfo,
-            redoArr: data.redoArr
+        cb({
+            drawingData: room.drawingData,
+            redoData: room.redoData
         });
     });
 
-    //Send current drawing data to clients
+    //Send new drawing data to clients
     socket.on("sendNewData", data => {
-        socket.broadcast.to(socket.data.roomName).emit("receiveNewData", data.newDrawingInfo);
+        const room = rooms.find(room => room.roomName === socket.data.roomName)!;
+        room.drawingData.push(data);
+
+        socket.to(socket.data.roomName).emit("receiveNewData", room.drawingData);
     });
 
-    //Undo/Redo drawing
+    //Undo drawing
     socket.on("sendUndo", () => {
-        socket.broadcast.to(socket.data.roomName).emit("receiveUndo");
+        const room = rooms.find(room => room.roomName === socket.data.roomName)!;
+        const undoEl = room.drawingData.pop();
+
+        if(!undoEl) return;
+        room.redoData.push(undoEl);
+
+        socket.to(socket.data.roomName).emit("receiveUndo", {
+            drawingData: room.drawingData,
+            redoData: room.redoData
+        });
     });
 
+    //Redo drawing
     socket.on("sendRedo", () => {
-        socket.broadcast.to(socket.data.roomName).emit("receiveRedo");
+        const room = rooms.find(room => room.roomName === socket.data.roomName)!;
+        const redoEl = room.redoData.pop();
+
+        if(!redoEl) return;
+        room.drawingData.push(redoEl);
+
+        socket.to(socket.data.roomName).emit("receiveRedo", {
+            drawingData: room.drawingData,
+            redoData: room.redoData
+        });
     });
 
     //Kick user
@@ -144,6 +180,11 @@ io.on("connection", (socket) => {
             io.to(sockets[0].id).emit("hostChange");
         };
 
+        if(sockets.length === 0) {
+            const i = rooms.findIndex(el => el.roomName === socket.data.roomName);
+            rooms.splice(i, 1);
+        };
+
         io.to(socket.data.roomName).emit("roomEvent", {
             clients: filterClients(sockets),
             user: socket.data.username,
@@ -162,6 +203,11 @@ io.on("connection", (socket) => {
         if(socket.data.isHost && sockets.length > 0) {
             sockets[0].data.isHost = true;
             io.to(sockets[0].id).emit("hostChange");
+        };
+
+        if(sockets.length === 0) {
+            const i = rooms.findIndex(el => el.roomName === socket.data.roomName);
+            rooms.splice(i, 1);
         };
 
         io.to(socket.data.roomName).emit("roomEvent", {
