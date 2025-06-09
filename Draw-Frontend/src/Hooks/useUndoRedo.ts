@@ -3,25 +3,25 @@ import { drawingCTX } from "../Context/DrawingContext/drawingCTX";
 import { useRenderCanvas } from "./useRenderCanvas";
 
 export function useUndoRedo() {
-    const { drawingInfoRef, redoArrRef } = useContext(drawingCTX);
+    const { drawingDataRef, redoDataRef } = useContext(drawingCTX);
     const { render } = useRenderCanvas();
 
     function undo() {
-        const undoEl = drawingInfoRef.current.pop();
+        const undoEl = drawingDataRef.current.pop();
 
         if(!undoEl) return;
 
-        redoArrRef.current.push(undoEl);
+        redoDataRef.current.push(undoEl);
 
         render();
     };
 
     function redo() {
-        const redoEl = redoArrRef.current.pop();
+        const redoEl = redoDataRef.current.pop();
 
         if(!redoEl) return;
 
-        drawingInfoRef.current.push(redoEl);
+        drawingDataRef.current.push(redoEl);
 
         render();
     };

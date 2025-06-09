@@ -5,11 +5,11 @@ import { socket } from "../socket";
 
 export function MenuModal({ setMenuOpen, menuOpen }: { setMenuOpen: Dispatch<SetStateAction<boolean>>, menuOpen: boolean }) {
     const { setClientData, clientData } = useContext(clientDataCTX);
-    const { drawingInfoRef, redoArrRef } = useContext(drawingCTX);
+    const { drawingDataRef, redoDataRef } = useContext(drawingCTX);
 
     function leaveRoom() {
-        drawingInfoRef.current = [];
-        redoArrRef.current = [];
+        drawingDataRef.current = [];
+        redoDataRef.current = [];
 
         setClientData(prev => {
             return {
@@ -65,7 +65,7 @@ export function MenuModal({ setMenuOpen, menuOpen }: { setMenuOpen: Dispatch<Set
                     {clientData.clients.filter(client => client.isHost === true).map(client => (
                         <div key={client.id} className="bg-blue-400 text-white rounded-md text-xl flex justify-between mb-6 p-3">
                             <h2 className="font-bold">Host:</h2>
-                            <div>{client.username}</div>
+                            <div>{client.username}{clientData.isHost && " (You)"}</div>
                         </div>
                     ))}
                     <ul className="bg-blue-400 text-white rounded-md text-xl mb-6 p-3">

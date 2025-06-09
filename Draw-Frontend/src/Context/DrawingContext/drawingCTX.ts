@@ -12,8 +12,8 @@ export interface drawingInterface {
 };
 
 interface drawingCTXInterface {
-    drawingInfoRef: React.RefObject<drawingInterface[]>,
-    redoArrRef: React.RefObject<drawingInterface[]>,
+    drawingDataRef: React.RefObject<drawingInterface[]>,
+    redoDataRef: React.RefObject<drawingInterface[]>,
     canvasRef: React.RefObject<HTMLCanvasElement | null>
 };
 

@@ -5,12 +5,12 @@ import { socket } from "../socket";
 
 export function JoinPage() {
     const { setClientData, clientData } = useContext(clientDataCTX);
+    
     const errorTimeoutRef = useRef<number>(0);
 
     const [usernameInput, setUsernameInput] = useState<string>(clientData.username);
     const [roomInput, setRoomInput] = useState<string>("");
     const [passwordInput, setPasswordInput] = useState<string>("");
-
     const [error, setError] = useState<string>("");
     const [activeTab, setActiveTab] = useState<"join" | "create">("join");
 
@@ -36,15 +36,6 @@ export function JoinPage() {
         }));
     };
 
-    function JoinPageDisconnect() {
-        setClientData(prev => {
-            return {
-                ...prev,
-                isDisconnected: true
-            }
-        });
-    };
-
     function setJoinError(error: string) {
         clearTimeout(errorTimeoutRef.current);
         setError(error);
@@ -54,22 +45,42 @@ export function JoinPage() {
         }, 5000);
     };
 
+    function joinPageDisconnect() {
+        setClientData(prev => {
+            return {
+                ...prev,
+                isDisconnected: true
+            }
+        });
+    };
+
+    function joinPageConnect() {
+        setClientData(prev => {
+            return {
+                ...prev,
+                isDisconnected: false
+            }
+        });
+    };
+
     useEffect(() => {
         socket.on("joinError", setJoinError);
         socket.on("joinedRoom", setClientJoinedData);
-        socket.on("connect_error", JoinPageDisconnect);
+        socket.on("connect_error", joinPageDisconnect);
+        socket.on("connect", joinPageConnect);
 
         return () => {
             socket.off("joinError", setJoinError);
             socket.off("joinedRoom", setClientJoinedData);
-            socket.off("connect_error", JoinPageDisconnect);
+            socket.off("connect_error", joinPageDisconnect);
+            socket.off("connect", joinPageConnect);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
         <div className="flex flex-col justify-center items-center h-screen gap-8">
-            <h1 className="text-5xl font-black flex">
+            <h1 className={`text-5xl font-black flex transition-all duration-300 ${activeTab === "create" && "translate-x-[0.5ch]"}`}>
                 <span className={`text-blue-400 flip-container ${activeTab === "create" && "flip"}`}>
                     <div className="front">Draw</div>
                     <div className="back">Create</div>

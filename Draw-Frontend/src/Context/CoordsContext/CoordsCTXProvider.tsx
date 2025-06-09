@@ -5,7 +5,8 @@ export function CoordsCTXProvider({ children }: { children: React.ReactNode }) {
     const canvasCoords = useRef<coordsCTXInterface>({
         x: 0,
         y: 0,
-        scale: 1
+        scale: 1,
+        isZooming: false
     });
 
     return (

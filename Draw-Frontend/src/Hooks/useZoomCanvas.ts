@@ -15,12 +15,12 @@ export function useZoomCanvas() {
 
     function mouseZoom(e: React.WheelEvent<HTMLCanvasElement>) {
         if(e.deltaY > 0 && coordsContext.scale > 0.1) {
-            coordsContext.scale -= 0.05;
+            coordsContext.scale = Math.round((coordsContext.scale - 0.1) * 100) / 100;
+            render();
         } else if(e.deltaY < 0) {
-            coordsContext.scale += 0.05;
+            coordsContext.scale = Math.round((coordsContext.scale + 0.1) * 100) / 100;
+            render();
         };
-
-        render();
     };
 
     function startTouchZoom(e: React.TouchEvent<HTMLCanvasElement>) {
@@ -30,19 +30,18 @@ export function useZoomCanvas() {
     };
 
     function touchZoom(e: React.TouchEvent<HTMLCanvasElement>) {
-        if(e.touches.length === 2 && coordsContext.scale > 0.1) {
+        if(e.touches.length === 2) {
             const distance = getDistance(e);
 
             if(distance > startDistance) {
-                coordsContext.scale += 0.01;
-            } else if (distance < startDistance) {
-                coordsContext.scale -= 0.01;
+                coordsContext.scale = Math.round((coordsContext.scale + 0.05) * 100) / 100;
+            } else if (distance < startDistance && coordsContext.scale > 0.1) {
+                coordsContext.scale = Math.round((coordsContext.scale - 0.05) * 100) / 100;
             };
 
             startDistance = distance;
+            render();
         };
-
-        render();
     };
 
     return { mouseZoom, startTouchZoom, touchZoom };

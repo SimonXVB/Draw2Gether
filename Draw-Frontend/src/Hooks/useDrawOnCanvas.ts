@@ -5,9 +5,9 @@ import { drawingCTX, type drawingInterface } from "../Context/DrawingContext/dra
 import { socket } from "../socket";
 
 export function useDrawOnCanvas() {
+    const { drawingDataRef, canvasRef } = useContext(drawingCTX);
     const { globalSettings } = useContext(globalSettingsCTX);
     const coordsContext = useContext(coordsCTX);
-    const { drawingInfoRef, canvasRef } = useContext(drawingCTX);
 
     let isDrawing: boolean = false;
     let currentDrawingInfo: drawingInterface = {} as drawingInterface;
@@ -66,7 +66,7 @@ export function useDrawOnCanvas() {
             const ctx = canvasRef.current!.getContext("2d")!;
             ctx.beginPath();
 
-            drawingInfoRef.current.push(currentDrawingInfo);
+            drawingDataRef.current.push(currentDrawingInfo);
             socket.emit("sendNewData", currentDrawingInfo);
         };
         isDrawing = false;

@@ -1,29 +1,18 @@
 import { Server } from "socket.io";
 import { filterClients } from "./utils";
+import { type joinRoomInterface, type roomsInterface, type drawingDataInterface } from "./types";
 
 const io = new Server({
     cors: {
-        origin: ["http://localhost:5173", "http://192.168.0.146:5173/"]
+        origin: "http://localhost:5173"
     }
 });
-
-interface dataInterface {
-    color: string,
-    size: number,
-    coords: []
-};
-
-interface roomsInterface {
-    roomName: string,
-    drawingData: dataInterface[],
-    redoData: dataInterface[]
-};
 
 const rooms: roomsInterface[] = [];
 
 io.on("connection", socket => {
     //Create room
-    socket.on("createRoom", async input => {
+    socket.on("createRoom", async (input: joinRoomInterface) => {
         if(input.roomName === "" || input.password === "" || input.username === "") {
             io.to(socket.id).emit("joinError", "empty");
             return;
@@ -62,7 +51,7 @@ io.on("connection", socket => {
     });
 
     //Join room
-    socket.on("joinRoom", async input => {
+    socket.on("joinRoom", async (input: joinRoomInterface) => {
         if(input.roomName === "" || input.password === "" || input.username === "") {
             io.to(socket.id).emit("joinError", "empty");
             return;
@@ -115,11 +104,11 @@ io.on("connection", socket => {
     });
 
     //Send new drawing data to clients
-    socket.on("sendNewData", data => {
+    socket.on("sendNewData", (data: drawingDataInterface) => {
         const room = rooms.find(room => room.roomName === socket.data.roomName)!;
         room.drawingData.push(data);
 
-        socket.to(socket.data.roomName).emit("receiveNewData", room.drawingData);
+        io.to(socket.data.roomName).emit("receiveNewData", room.drawingData);
     });
 
     //Undo drawing
@@ -130,7 +119,7 @@ io.on("connection", socket => {
         if(!undoEl) return;
         room.redoData.push(undoEl);
 
-        socket.to(socket.data.roomName).emit("receiveUndo", {
+        io.to(socket.data.roomName).emit("receiveUndo", {
             drawingData: room.drawingData,
             redoData: room.redoData
         });
@@ -144,7 +133,7 @@ io.on("connection", socket => {
         if(!redoEl) return;
         room.drawingData.push(redoEl);
 
-        socket.to(socket.data.roomName).emit("receiveRedo", {
+        io.to(room.roomName).emit("receiveRedo", {
             drawingData: room.drawingData,
             redoData: room.redoData
         });
@@ -158,12 +147,17 @@ io.on("connection", socket => {
         const userToKick = sockets.filter(socket => socket.id === id)[0];
 
         io.to(userToKick.id).emit("kickUserClient");
+        userToKick.leave(userToKick.data.roomName);
+
+        const updatedSockets = await io.in(socket.data.roomName).fetchSockets();
+
         io.to(sockets[0].data.roomName).emit("roomEvent", {
-            clients: filterClients(sockets),
+            clients: filterClients(updatedSockets),
             user: socket.data.username,
             event: "kicked"
         });
 
+        userToKick.data.username = "";
         userToKick.data.password = "";
         userToKick.data.roomName = "";
         userToKick.data.isHost = false;
@@ -191,12 +185,13 @@ io.on("connection", socket => {
             event: "left"
         });
 
+        socket.data.username = "";
         socket.data.password = "";
         socket.data.roomName = "";
         socket.data.isHost = false;
     });
 
-    //General disconnect function
+    //Disconnect function
     socket.on("disconnect", async () => {
         const sockets = await io.in(socket.data.roomName).fetchSockets();
 
@@ -216,6 +211,7 @@ io.on("connection", socket => {
             event: "disconnected"
         });
 
+        socket.data.username = "";
         socket.data.password = "";
         socket.data.roomName = "";
         socket.data.isHost = false;

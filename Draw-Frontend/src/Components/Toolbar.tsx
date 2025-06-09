@@ -8,7 +8,7 @@ import { socket } from "../socket";
 
 export function Toolbar({ setMenuOpen }: { setMenuOpen: Dispatch<SetStateAction<boolean>> }) {
     const { globalSettings, setGlobalSettings } = useContext(globalSettingsCTX);
-    const { drawingInfoRef, redoArrRef } = useContext(drawingCTX);
+    const { drawingDataRef, redoDataRef } = useContext(drawingCTX);
 
     const { undo, redo } = useUndoRedo();
     const { render } = useRenderCanvas();
@@ -50,26 +50,26 @@ export function Toolbar({ setMenuOpen }: { setMenuOpen: Dispatch<SetStateAction<
         redo();
     };
 
-    function setNewDrawingData(data: { drawingData: drawingInterface[], redoData: drawingInterface[] }) {
-        drawingInfoRef.current = data.drawingData;
-        redoArrRef.current = data.redoData;
+    function setNewData(data: { drawingData: drawingInterface[], redoData: drawingInterface[] }) {
+        drawingDataRef.current = data.drawingData;
+        redoDataRef.current = data.redoData;
         render();
     };
 
     useEffect(() => {
-        socket.on("receiveUndo", setNewDrawingData);
-        socket.on("receiveRedo", setNewDrawingData);
+        socket.on("receiveUndo", setNewData);
+        socket.on("receiveRedo", setNewData);
 
         return () => {
-            socket.off("receiveUndo", setNewDrawingData);
-            socket.off("receiveRedo", setNewDrawingData);
+            socket.off("receiveUndo", setNewData);
+            socket.off("receiveRedo", setNewData);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
         <div className="fixed flex justify-center top-0 left-0 w-screen">
-            <div className="flex items-center font-bold p-3 bg-red-400 gap-2 rounded-b-md overflow-auto">
+            <div className="flex items-center font-bold p-3 bg-red-400 gap-2 rounded-b-md overflow-x-scroll">
                 <button className="flex justify-center cursor-pointer bg-red-400 p-3 rounded-md hover:bg-white hover:*:fill-red-400" onClick={() => setMenuOpen(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#fff" viewBox="0 0 16 16">
                         <path fillRule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
@@ -77,7 +77,7 @@ export function Toolbar({ setMenuOpen }: { setMenuOpen: Dispatch<SetStateAction<
                 </button>
                 <div className="w-0.5 bg-white h-full"></div>
                 <input type="color" id="toolbar-color" onChange={e => setColor(e)}/>
-                <div className="flex justify-between items-center gap-2 w-[300px]">
+                <div className="flex justify-between items-center gap-2 min-w-[300px]">
                     <input type="range" id="toolbar-slider" min={1} max={500} step={1} defaultValue={globalSettings.size} onChange={e => setSize(e)} className="w-[80%] cursor-pointer"/>
                     <span className="text-white">{globalSettings.size}px</span>
                 </div>

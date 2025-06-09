@@ -4,13 +4,14 @@ import { drawingCTX } from "../Context/DrawingContext/drawingCTX";
 
 export function useRenderCanvas() {
     const coordsContext = useContext(coordsCTX);
-    const { drawingInfoRef, canvasRef } = useContext(drawingCTX);
+    const { drawingDataRef, canvasRef } = useContext(drawingCTX);
 
     function render() {
         const ctx = canvasRef.current!.getContext("2d")!;
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
+        ctx.translate(canvasRef.current!.width / 2, canvasRef.current!.height / 2);
         ctx.setTransform(coordsContext.scale, 0, 0, coordsContext.scale, coordsContext.x, coordsContext.y);
 
         ctx.fillStyle = "#1ee825";
@@ -20,7 +21,7 @@ export function useRenderCanvas() {
         ctx.strokeStyle = "#000000";
         ctx.strokeRect(-3500, -3500, 7000, 7000);
 
-        drawingInfoRef.current.forEach(drawing => {
+        drawingDataRef.current.forEach(drawing => {
             ctx.strokeStyle = drawing.color;
             ctx.lineWidth = drawing.size;
             ctx.lineCap = "round";

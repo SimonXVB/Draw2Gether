@@ -21,7 +21,7 @@ export function DrawingCanvas() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [roomEvent, setRoomEvent] = useState<roomEventInterface>({} as roomEventInterface);
 
-    const { drawingInfoRef, redoArrRef, canvasRef } = useContext(drawingCTX);
+    const { drawingDataRef, redoDataRef, canvasRef } = useContext(drawingCTX);
     const { setClientData } = useContext(clientDataCTX);
 
     const { render } = useRenderCanvas();
@@ -32,14 +32,14 @@ export function DrawingCanvas() {
     //Socket.io functions
     function getInitialData() {
         socket.emit("getInitialData", (data: { drawingData: drawingInterface[], redoData: drawingInterface[] }) => {
-            drawingInfoRef.current = data.drawingData;
-            redoArrRef.current = data.redoData;
+            drawingDataRef.current = data.drawingData;
+            redoDataRef.current = data.redoData;
             render();
         });
     };
 
     function setNewData(newDrawingInfo: drawingInterface[]) {
-        drawingInfoRef.current = newDrawingInfo;
+        drawingDataRef.current = newDrawingInfo;
         render();
     };
 
@@ -67,8 +67,8 @@ export function DrawingCanvas() {
     };
 
     function roomDisconnect() {
-        drawingInfoRef.current = [];
-        redoArrRef.current = [];
+        drawingDataRef.current = [];
+        redoDataRef.current = [];
         
         setClientData(prev => {
             return {
@@ -84,8 +84,8 @@ export function DrawingCanvas() {
     };
 
     function kickUserClient() {
-        drawingInfoRef.current = [];
-        redoArrRef.current = [];
+        drawingDataRef.current = [];
+        redoDataRef.current = [];
 
         setClientData(prev => {
             return {
@@ -106,18 +106,18 @@ export function DrawingCanvas() {
         };
 
         socket.on("receiveNewData", setNewData);
-        socket.on("disconnect", roomDisconnect);
         socket.on("roomEvent", setNewClients);
         socket.on("hostChange", setNewHost);
+        socket.on("disconnect", roomDisconnect);
         socket.on("kickUserClient", kickUserClient);
 
         return () => {
             initialEmitRef.current = false;
 
             socket.off("receiveNewData", setNewData);
-            socket.off("disconnect", roomDisconnect);
             socket.off("roomEvent", setNewClients);
             socket.off("hostChange", setNewHost);
+            socket.off("disconnect", roomDisconnect);
             socket.off("kickUserClient", kickUserClient);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps

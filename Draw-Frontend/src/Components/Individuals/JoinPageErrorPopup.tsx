@@ -21,7 +21,7 @@ export function JoinPageErrorPopup() {
     return (
         <>
             {(clientData.isKicked || clientData.isDisconnected) &&
-                <div className="fixed bottom-0 left-0 font-bold bg-red-400 px-2 py-1 rounded-tr-md text-white">
+                <div className="fixed bottom-0 left-0 font-bold px-2 py-1 rounded-tr-md text-white bg-red-400">
                     {clientData.isKicked && <div>You have been kicked!</div>}
                     {clientData.isDisconnected && <div>Connection to server lost!</div>}
                 </div>

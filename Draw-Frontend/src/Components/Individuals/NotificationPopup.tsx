@@ -1,7 +1,7 @@
 import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
-import { type serverEventInterface } from "../DrawingCanvas";
+import { type roomEventInterface } from "../DrawingCanvas";
 
-export function NotificationPopup({ setRoomEvent, roomEvent } : { setRoomEvent: Dispatch<SetStateAction<serverEventInterface>>, roomEvent: serverEventInterface}) {
+export function NotificationPopup({ setRoomEvent, roomEvent } : { setRoomEvent: Dispatch<SetStateAction<roomEventInterface>>, roomEvent: roomEventInterface}) {
     const timeoutRef = useRef<number>(0);
     const notiRef = useRef<HTMLDivElement>(null);
 
@@ -14,9 +14,14 @@ export function NotificationPopup({ setRoomEvent, roomEvent } : { setRoomEvent: 
                 notiRef.current!.style.left = "-100%";
 
                 notiRef.current!.ontransitionend = () => {
-                    setRoomEvent({} as serverEventInterface);
+                    setRoomEvent({} as roomEventInterface);
                 };
             }, 5000);
+        };
+
+        return () => {
+            clearTimeout(timeoutRef.current);
+            notiRef.current = null;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [roomEvent]);
