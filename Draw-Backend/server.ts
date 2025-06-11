@@ -97,6 +97,11 @@ io.on("connection", socket => {
     socket.on("getInitialData", cb => {
         const room = rooms.find(room => room.roomName === socket.data.roomName)!;
 
+        if(!room.drawingData || !room.redoData) {
+            io.to(socket.id).emit("joinError", "roomNotExists");
+            return;
+        };
+
         cb({
             drawingData: room.drawingData,
             redoData: room.redoData
