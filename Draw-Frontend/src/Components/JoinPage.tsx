@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { clientDataCTX } from "../Context/ClientData/clientDataCTX";
+import { clientDataCTX } from "../Context/ClientDataContext/clientDataCTX";
 import { JoinPageErrorPopup } from "./Individuals/JoinPageErrorPopup";
 import { socket } from "../socket";
 

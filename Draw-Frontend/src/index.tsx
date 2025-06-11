@@ -1,21 +1,21 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Main } from './main';
-import { CoordsCTXProvider } from "./Context/CoordsContext/CoordsCTXProvider"
+import { TransformCTXProvider } from "./Context/TransformContext/TransformCTXProvider"
 import { GlobalSettingsCTXProvider } from "./Context/GlobalSettingsContext/GlobalSettingsCTXProvider"
 import { DrawingCTXProvider } from "./Context/DrawingContext/DrawingCTXProvider"
-import { ClientDataCTXProvider } from './Context/ClientData/ClientDataCTXProvider';
+import { ClientDataCTXProvider } from './Context/ClientDataContext/ClientDataCTXProvider';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ClientDataCTXProvider>
-    <CoordsCTXProvider>
+    <TransformCTXProvider>
     <GlobalSettingsCTXProvider>
     <DrawingCTXProvider>
       <Main/>
     </DrawingCTXProvider>
     </GlobalSettingsCTXProvider>
-    </CoordsCTXProvider>
+    </TransformCTXProvider>
     </ClientDataCTXProvider>
   </StrictMode>
 );

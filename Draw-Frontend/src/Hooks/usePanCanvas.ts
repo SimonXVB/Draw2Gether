@@ -1,10 +1,10 @@
 import { useContext } from "react";
 import { useRenderCanvas } from "./useRenderCanvas";
-import { coordsCTX } from "../Context/CoordsContext/coordsCTX";
+import { transformCTX } from "../Context/TransformContext/transformCTX";
 
 export function usePanCanvas() {
     const { render } = useRenderCanvas();
-    const coordsContext = useContext(coordsCTX);
+    const transformContext = useContext(transformCTX);
 
     let prevX = 0;
     let prevY = 0;
@@ -30,8 +30,8 @@ export function usePanCanvas() {
 
     function mousePan(e: React.MouseEvent<HTMLCanvasElement>) {
         if(isDown) {
-            coordsContext.x += e.clientX - prevX;
-            coordsContext.y += e.clientY - prevY;
+            transformContext.x += e.clientX - prevX;
+            transformContext.y += e.clientY - prevY;
 
             render();
 
@@ -42,8 +42,8 @@ export function usePanCanvas() {
 
     function touchPan(e: React.TouchEvent<HTMLCanvasElement>) {
         if(isDown) {
-            coordsContext.x += e.touches[0].clientX - prevX;
-            coordsContext.y += e.touches[0].clientY - prevY;
+            transformContext.x += e.touches[0].clientX - prevX;
+            transformContext.y += e.touches[0].clientY - prevY;
 
             render();
 

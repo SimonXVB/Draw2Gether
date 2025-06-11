@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react"
-import { clientDataCTX } from "../../Context/ClientData/clientDataCTX";
+import { clientDataCTX } from "../../Context/ClientDataContext/clientDataCTX";
 
 export function JoinPageErrorPopup() {
     const { clientData, setClientData } = useContext(clientDataCTX);

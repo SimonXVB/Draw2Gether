@@ -1,11 +1,11 @@
 import { useContext } from "react";
-import { coordsCTX } from "../Context/CoordsContext/coordsCTX";
+import { transformCTX } from "../Context/TransformContext/transformCTX";
 import { useRenderCanvas } from "./useRenderCanvas";
 
 export function useZoomCanvas() {
-    const { render } = useRenderCanvas();
+    const { zoomCanvas } = useRenderCanvas();
 
-    const coordsContext = useContext(coordsCTX);
+    const transformContext = useContext(transformCTX);
 
     let startDistance: number;
 
@@ -14,12 +14,10 @@ export function useZoomCanvas() {
     };
 
     function mouseZoom(e: React.WheelEvent<HTMLCanvasElement>) {
-        if(e.deltaY > 0 && coordsContext.scale > 0.1) {
-            coordsContext.scale = Math.round((coordsContext.scale - 0.1) * 100) / 100;
-            render();
+        if(e.deltaY > 0 && transformContext.scale > 0.1) {
+            zoomCanvas(Math.round((transformContext.scale - 0.1) * 100) / 100);
         } else if(e.deltaY < 0) {
-            coordsContext.scale = Math.round((coordsContext.scale + 0.1) * 100) / 100;
-            render();
+            zoomCanvas(Math.round((transformContext.scale + 0.1) * 100) / 100);
         };
     };
 
@@ -34,13 +32,12 @@ export function useZoomCanvas() {
             const distance = getDistance(e);
 
             if(distance > startDistance) {
-                coordsContext.scale = Math.round((coordsContext.scale + 0.05) * 100) / 100;
-            } else if (distance < startDistance && coordsContext.scale > 0.1) {
-                coordsContext.scale = Math.round((coordsContext.scale - 0.05) * 100) / 100;
+                zoomCanvas(Math.round((transformContext.scale + 0.05) * 100) / 100);
+            } else if (distance < startDistance && transformContext.scale > 0.1) {
+                zoomCanvas(Math.round((transformContext.scale - 0.05) * 100) / 100);
             };
 
             startDistance = distance;
-            render();
         };
     };
 

@@ -1,13 +1,13 @@
 import { useContext } from "react";
 import { globalSettingsCTX } from "../Context/GlobalSettingsContext/globalSettingsCTX";
-import { coordsCTX } from "../Context/CoordsContext/coordsCTX";
+import { transformCTX } from "../Context/TransformContext/transformCTX";
 import { drawingCTX, type drawingInterface } from "../Context/DrawingContext/drawingCTX";
 import { socket } from "../socket";
 
 export function useDrawOnCanvas() {
     const { drawingDataRef, canvasRef } = useContext(drawingCTX);
     const { globalSettings } = useContext(globalSettingsCTX);
-    const coordsContext = useContext(coordsCTX);
+    const transformContext = useContext(transformCTX);
 
     let isDrawing: boolean = false;
     let currentDrawingInfo: drawingInterface = {} as drawingInterface;
@@ -32,12 +32,12 @@ export function useDrawOnCanvas() {
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
 
-            ctx.lineTo((e.clientX - coordsContext.x) / coordsContext.scale, (e.clientY - coordsContext.y) / coordsContext.scale);
+            ctx.lineTo((e.clientX - transformContext.x) / transformContext.scale, (e.clientY - transformContext.y) / transformContext.scale);
             ctx.stroke();
 
             currentDrawingInfo.coords.push({
-                x: (e.clientX - coordsContext.x) / coordsContext.scale, 
-                y: (e.clientY - coordsContext.y) / coordsContext.scale
+                x: (e.clientX - transformContext.x) / transformContext.scale, 
+                y: (e.clientY - transformContext.y) / transformContext.scale
             });
         };
     };
@@ -51,12 +51,12 @@ export function useDrawOnCanvas() {
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
 
-            ctx.lineTo((e.touches[0].clientX - coordsContext.x) / coordsContext.scale, (e.touches[0].clientY - coordsContext.y) / coordsContext.scale);
+            ctx.lineTo((e.touches[0].clientX - transformContext.x) / transformContext.scale, (e.touches[0].clientY - transformContext.y) / transformContext.scale);
             ctx.stroke();
 
             currentDrawingInfo.coords.push({
-                x: (e.touches[0].clientX - coordsContext.x) / coordsContext.scale, 
-                y: (e.touches[0].clientY - coordsContext.y) / coordsContext.scale
+                x: (e.touches[0].clientX - transformContext.x) / transformContext.scale, 
+                y: (e.touches[0].clientY - transformContext.y) / transformContext.scale
             });
         };
     };

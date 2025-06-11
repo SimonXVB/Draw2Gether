@@ -1,11 +1,14 @@
 import { useContext, type Dispatch, type SetStateAction } from "react"
-import { clientDataCTX } from "../Context/ClientData/clientDataCTX"
+import { clientDataCTX } from "../Context/ClientDataContext/clientDataCTX"
 import { drawingCTX } from "../Context/DrawingContext/drawingCTX";
+import { useCanvasToImage } from "../Hooks/useCanvasToImage";
 import { socket } from "../socket";
 
 export function MenuModal({ setMenuOpen, menuOpen }: { setMenuOpen: Dispatch<SetStateAction<boolean>>, menuOpen: boolean }) {
     const { setClientData, clientData } = useContext(clientDataCTX);
     const { drawingDataRef, redoDataRef } = useContext(drawingCTX);
+
+    const { canvasToImage } = useCanvasToImage();
 
     function leaveRoom() {
         drawingDataRef.current = [];
@@ -84,6 +87,7 @@ export function MenuModal({ setMenuOpen, menuOpen }: { setMenuOpen: Dispatch<Set
                             </li>
                         ))}
                     </ul>
+                    <button onClick={canvasToImage} className="bg-blue-400 w-full rounded-md p-3 text-white font-bold cursor-pointer hover:bg-blue-400/80 hover:scale-105 transition-all duration-300 mb-2">Download as PNG</button>
                     <button onClick={leaveRoom} className="bg-red-400 w-full rounded-md p-3 text-white font-bold cursor-pointer hover:bg-red-400/80 hover:scale-105 transition-all duration-300">Leave Room</button>
                 </div>
             </div>

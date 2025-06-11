@@ -1,9 +1,9 @@
 import { useContext } from "react";
-import { coordsCTX } from "../Context/CoordsContext/coordsCTX";
+import { transformCTX } from "../Context/TransformContext/transformCTX";
 import { drawingCTX } from "../Context/DrawingContext/drawingCTX";
 
 export function useRenderCanvas() {
-    const coordsContext = useContext(coordsCTX);
+    const transformContext = useContext(transformCTX);
     const { drawingDataRef, canvasRef } = useContext(drawingCTX);
 
     function render() {
@@ -11,8 +11,7 @@ export function useRenderCanvas() {
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
-        ctx.translate(canvasRef.current!.width / 2, canvasRef.current!.height / 2);
-        ctx.setTransform(coordsContext.scale, 0, 0, coordsContext.scale, coordsContext.x, coordsContext.y);
+        ctx.setTransform(transformContext.scale, 0, 0, transformContext.scale, transformContext.x, transformContext.y);
 
         ctx.fillStyle = "#1ee825";
         ctx.fillRect(-10, -10, 20, 20);
@@ -36,5 +35,30 @@ export function useRenderCanvas() {
         });
     };
 
-    return { render };
+    function zoomCanvas(scale: number) {
+        const oldX = transformContext.x;
+        const oldY = transformContext.y;
+
+        const halfX = canvasRef.current!.width / 2;
+        const halfY = canvasRef.current!.height / 2;
+        const previousScale = transformContext.scale;
+
+        const newX = halfX - (halfX - oldX) * (scale / previousScale);
+        const newY = halfY - (halfY - oldY) * (scale / previousScale);
+
+        transformContext.x = newX;
+        transformContext.y = newY;
+        transformContext.scale = scale;
+
+        render();
+    };
+
+    function jumpToOrigin() {
+        transformContext.x = canvasRef.current!.width / 2;
+        transformContext.y = canvasRef.current!.height / 2;
+
+        render();
+    };
+
+    return { render, zoomCanvas, jumpToOrigin };
 };

@@ -7,7 +7,7 @@ import { Toolbar } from "./Toolbar";
 import { MenuModal } from "./MenuModal";
 import { NotificationPopup } from "./Individuals/NotificationPopup";
 import { drawingCTX, type drawingInterface } from "../Context/DrawingContext/drawingCTX";
-import { clientDataCTX } from "../Context/ClientData/clientDataCTX";
+import { clientDataCTX } from "../Context/ClientDataContext/clientDataCTX";
 import { socket } from "../socket";
 
 export interface roomEventInterface {
@@ -131,7 +131,7 @@ export function DrawingCanvas() {
                 onMouseMove={e => {mousePan(e); mouseDraw(e)}}
                 onMouseUp={() => {stopPan(); stopDrawing()}}
                 onMouseLeave={() => {stopPan(); stopDrawing()}}
-                onWheel={mouseZoom}
+                onWheel={e => mouseZoom(e)}
 
                 onTouchStart={e => {startTouchPan(e); startTouchZoom(e); startDrawing(e)}}
                 onTouchMove={e => {touchPan(e); touchZoom(e); touchDraw(e)}}
