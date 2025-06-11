@@ -83,7 +83,7 @@ export function JoinPage() {
             <h1 className={`text-5xl font-black flex transition-all duration-300 ${activeTab === "create" && "translate-x-[0.5ch]"}`}>
                 <span className={`text-blue-400 flip-container ${activeTab === "create" && "flip"}`}>
                     <div className="front">Draw</div>
-                    <div className="back">Create</div>
+                    <div className="back" aria-hidden="true">Create</div>
                 </span>
                 <span>2</span>
                 <span className="text-red-400">Gether</span>

@@ -11,24 +11,23 @@ export function NotificationPopup({ setRoomEvent, roomEvent } : { setRoomEvent: 
             notiRef.current.style.left = "0%";
 
             timeoutRef.current = setTimeout(() => {
-                notiRef.current!.style.left = "-100%";
+                if(notiRef.current) {
+                    notiRef.current!.style.left = "-100%";
 
-                notiRef.current!.ontransitionend = () => {
+                    notiRef.current!.ontransitionend = () => {
+                        setRoomEvent({} as roomEventInterface);
+                    };
+                } else {
                     setRoomEvent({} as roomEventInterface);
                 };
             }, 5000);
         };
-
-        return () => {
-            clearTimeout(timeoutRef.current);
-            notiRef.current = null;
-        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [roomEvent]);
+    }, [roomEvent.event]);
 
     return (
         <>
-            {roomEvent.event && 
+            {roomEvent.event &&
                 <div ref={notiRef} className="fixed bottom-0 -left-full font-bold bg-red-400 px-2 py-1 rounded-tr-md text-white transition-all duration-300">
                     {roomEvent.event === "joined" && <div>{roomEvent.user} has joined the room!</div>}
                     {roomEvent.event === "left" && <div>{roomEvent.user} has left the room!</div>}

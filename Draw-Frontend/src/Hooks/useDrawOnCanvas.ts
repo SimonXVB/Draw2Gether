@@ -32,12 +32,23 @@ export function useDrawOnCanvas() {
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
 
-            ctx.lineTo((e.clientX - transformContext.x) / transformContext.scale, (e.clientY - transformContext.y) / transformContext.scale);
+            const x = (e.clientX - transformContext.x) / transformContext.scale;
+            const y = (e.clientY - transformContext.y) / transformContext.scale;
+
+            if(x <= -(3500 - globalSettings.size / 2) || y <= -(3500 - globalSettings.size / 2) || x >= 3500 - (globalSettings.size / 2) || y >= 3500 - (globalSettings.size / 2)) {
+                stopDrawing();
+                startDrawing(e);
+                return;
+            };
+
+            console.log("draw")
+
+            ctx.lineTo(x, y);
             ctx.stroke();
 
             currentDrawingInfo.coords.push({
-                x: (e.clientX - transformContext.x) / transformContext.scale, 
-                y: (e.clientY - transformContext.y) / transformContext.scale
+                x: x, 
+                y: y
             });
         };
     };
@@ -51,12 +62,21 @@ export function useDrawOnCanvas() {
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
 
-            ctx.lineTo((e.touches[0].clientX - transformContext.x) / transformContext.scale, (e.touches[0].clientY - transformContext.y) / transformContext.scale);
+            const x = (e.touches[0].clientX - transformContext.x) / transformContext.scale;
+            const y = (e.touches[0].clientY - transformContext.y) / transformContext.scale;
+
+            if(x <= -(3500 - globalSettings.size / 2) || y <= -(3500 - globalSettings.size / 2) || x >= 3500 - (globalSettings.size / 2) || y >= 3500 - (globalSettings.size / 2)) {
+                stopDrawing();
+                startDrawing(e);
+                return;
+            };
+
+            ctx.lineTo(x, y);
             ctx.stroke();
 
             currentDrawingInfo.coords.push({
-                x: (e.touches[0].clientX - transformContext.x) / transformContext.scale, 
-                y: (e.touches[0].clientY - transformContext.y) / transformContext.scale
+                x: x, 
+                y: y
             });
         };
     };

@@ -8,21 +8,17 @@ export function useUndoRedo() {
 
     function undo() {
         const undoEl = drawingDataRef.current.pop();
-
         if(!undoEl) return;
 
         redoDataRef.current.push(undoEl);
-
         render();
     };
 
     function redo() {
         const redoEl = redoDataRef.current.pop();
-
         if(!redoEl) return;
-
+        
         drawingDataRef.current.push(redoEl);
-
         render();
     };
 

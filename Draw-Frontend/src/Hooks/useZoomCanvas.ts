@@ -10,7 +10,7 @@ export function useZoomCanvas() {
     let startDistance: number;
 
     function getDistance(e: React.TouchEvent<HTMLCanvasElement>) {
-        return Math.sqrt(Math.pow(e.touches[1].clientX - e.touches[0].clientX, 2) + Math.sqrt(Math.pow(e.touches[1].clientY - e.touches[0].clientY, 2)));
+        return Math.sqrt(Math.pow(e.touches[1].clientX - e.touches[0].clientX, 2) + Math.pow(e.touches[1].clientY - e.touches[0].clientY, 2));
     };
 
     function mouseZoom(e: React.WheelEvent<HTMLCanvasElement>) {

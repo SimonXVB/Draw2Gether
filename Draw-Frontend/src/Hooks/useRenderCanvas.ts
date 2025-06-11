@@ -13,13 +13,6 @@ export function useRenderCanvas() {
         ctx.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
         ctx.setTransform(transformContext.scale, 0, 0, transformContext.scale, transformContext.x, transformContext.y);
 
-        ctx.fillStyle = "#1ee825";
-        ctx.fillRect(-10, -10, 20, 20);
-
-        ctx.lineWidth = 20;
-        ctx.strokeStyle = "#000000";
-        ctx.strokeRect(-3500, -3500, 7000, 7000);
-
         drawingDataRef.current.forEach(drawing => {
             ctx.strokeStyle = drawing.color;
             ctx.lineWidth = drawing.size;
@@ -33,6 +26,10 @@ export function useRenderCanvas() {
             ctx.stroke();
             ctx.beginPath();
         });
+
+        ctx.lineWidth = 25;
+        ctx.strokeStyle = "#000000";
+        ctx.strokeRect(-3500, -3500, 7000, 7000);
     };
 
     function zoomCanvas(scale: number) {
