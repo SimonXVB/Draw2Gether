@@ -1,8 +1,8 @@
 import { useContext, type Dispatch, type SetStateAction } from "react"
-import { clientDataCTX } from "../Context/ClientDataContext/clientDataCTX"
-import { drawingCTX } from "../Context/DrawingContext/drawingCTX";
-import { useCanvasToImage } from "../Hooks/useCanvasToImage";
-import { socket } from "../socket";
+import { clientDataCTX } from "../../Context/ClientDataContext/clientDataCTX"
+import { drawingCTX } from "../../Context/DrawingContext/drawingCTX";
+import { useCanvasToImage } from "../../Hooks/useCanvasToImage";
+import { socket } from "../../socket";
 
 export function MenuModal({ setMenuOpen, menuOpen }: { setMenuOpen: Dispatch<SetStateAction<boolean>>, menuOpen: boolean }) {
     const { setClientData, clientData } = useContext(clientDataCTX);
@@ -35,7 +35,7 @@ export function MenuModal({ setMenuOpen, menuOpen }: { setMenuOpen: Dispatch<Set
     return (
         <>
         {menuOpen &&
-            <div className="fixed top-0 left-0 flex justify-center items-center w-screen h-screen bg-gray-400/50" onClick={(e) => e.target === e.currentTarget && setMenuOpen(false)}>
+            <div className="fixed top-0 left-0 z-20 flex justify-center items-center w-screen h-screen bg-gray-400/50" onClick={(e) => e.target === e.currentTarget && setMenuOpen(false)}>
                 <div className="bg-white max-h-[80vh] max-w-[500px] p-6 mx-2 rounded-xl overflow-auto shadow-lg shadow-gray-500">
                     <h1 className="text-4xl font-black text-center mb-4">
                         <span className="text-blue-400">Draw</span>
@@ -74,8 +74,8 @@ export function MenuModal({ setMenuOpen, menuOpen }: { setMenuOpen: Dispatch<Set
                     <ul className="bg-blue-400 text-white rounded-md text-xl mb-6 p-3">
                         <h2 className="font-bold">Users:</h2>
                         {clientData.clients.filter(client => client.isHost === false).map(client => (
-                            <li key={client.id} className="flex justify-between list-disc list-inside">
-                                <p>{client.username}</p>
+                            <li key={client.id} className="flex justify-between">
+                                <p>~ {client.username}</p>
                                 {clientData.isHost && 
                                     <button className="cursor-pointer hover:scale-125 active:scale-100 duration-100 transition-all" title={`Kick ${client.username}`} onClick={() => kickUser(client.id)}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#fff" viewBox="0 0 16 16">

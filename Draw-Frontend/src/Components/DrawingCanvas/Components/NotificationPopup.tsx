@@ -1,9 +1,12 @@
 import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import { type roomEventInterface } from "../DrawingCanvas";
+import { useRenderCanvas } from "../../../Hooks/useRenderCanvas";
 
 export function NotificationPopup({ setRoomEvent, roomEvent } : { setRoomEvent: Dispatch<SetStateAction<roomEventInterface>>, roomEvent: roomEventInterface}) {
     const timeoutRef = useRef<number>(0);
     const notiRef = useRef<HTMLDivElement>(null);
+
+    const { render } = useRenderCanvas();
 
     useEffect(() => {
         if(notiRef.current) {
@@ -16,6 +19,7 @@ export function NotificationPopup({ setRoomEvent, roomEvent } : { setRoomEvent: 
 
                     notiRef.current!.ontransitionend = () => {
                         setRoomEvent({} as roomEventInterface);
+                        render();
                     };
                 } else {
                     setRoomEvent({} as roomEventInterface);

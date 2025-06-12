@@ -84,14 +84,21 @@ body {
 
 /*Toolbar Color Input*/
 #toolbar-color {
-  height: 49px;
-  width: 49px;
+  height: 43px;
+  width: 43px;
+  min-width: 43px;
   cursor: pointer;
   border-radius: 6px;
+  transition: all 100ms;
 }
 
 #toolbar-color:hover {
   outline: 2px solid white;
+  scale: 110%;
+}
+
+#toolbar-color:active {
+  scale: 100%;
 }
 
 #toolbar-color::-moz-color-swatch {

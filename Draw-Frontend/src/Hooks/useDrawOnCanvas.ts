@@ -41,8 +41,6 @@ export function useDrawOnCanvas() {
                 return;
             };
 
-            console.log("draw")
-
             ctx.lineTo(x, y);
             ctx.stroke();
 
@@ -89,6 +87,7 @@ export function useDrawOnCanvas() {
             drawingDataRef.current.push(currentDrawingInfo);
             socket.emit("sendNewData", currentDrawingInfo);
         };
+        
         isDrawing = false;
     };
 

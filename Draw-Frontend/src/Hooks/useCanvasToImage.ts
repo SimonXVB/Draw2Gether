@@ -11,6 +11,9 @@ export function useCanvasToImage() {
         canvas.width = 7000;
         canvas.height = 7000;
 
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, 7000, 7000);
+
         drawingDataRef.current.forEach(drawing => {
             ctx.strokeStyle = drawing.color;
             ctx.lineWidth = drawing.size;
@@ -25,15 +28,16 @@ export function useCanvasToImage() {
             ctx.beginPath();
         });
 
-        const img = canvas.toDataURL("image/png");
-
-        const a = document.createElement("a");
-        a.href = img
-        a.download = "img";
-        a.style.display = "none";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        canvas.toBlob(blob => {
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob!);
+            a.download = "img";
+            a.style.display = "none";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+        });
     };
 
     return { canvasToImage };

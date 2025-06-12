@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { clientDataCTX } from "../Context/ClientDataContext/clientDataCTX";
-import { JoinPageErrorPopup } from "./Individuals/JoinPageErrorPopup";
-import { socket } from "../socket";
+import { clientDataCTX } from "../../Context/ClientDataContext/clientDataCTX";
+import { JoinPageErrorPopup } from "./Components/JoinPageErrorPopup";
+import { socket } from "../../socket";
 
 export function JoinPage() {
     const { setClientData, clientData } = useContext(clientDataCTX);

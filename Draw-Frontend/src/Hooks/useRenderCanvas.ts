@@ -33,6 +33,8 @@ export function useRenderCanvas() {
     };
 
     function zoomCanvas(scale: number) {
+        if(scale < 0.1) return;
+
         const oldX = transformContext.x;
         const oldY = transformContext.y;
 

@@ -4,7 +4,7 @@ import { type joinRoomInterface, type roomsInterface, type drawingDataInterface 
 
 const io = new Server({
     cors: {
-        origin: "http://localhost:5173"
+        origin: process.env.ORIGIN
     }
 });
 
@@ -97,7 +97,7 @@ io.on("connection", socket => {
     socket.on("getInitialData", cb => {
         const room = rooms.find(room => room.roomName === socket.data.roomName)!;
 
-        if(!room.drawingData || !room.redoData) {
+        if(!room) {
             io.to(socket.id).emit("joinError", "roomNotExists");
             return;
         };
@@ -111,14 +111,22 @@ io.on("connection", socket => {
     //Send new drawing data to clients
     socket.on("sendNewData", (data: drawingDataInterface) => {
         const room = rooms.find(room => room.roomName === socket.data.roomName)!;
+        if(!room) return;
+
         room.drawingData.push(data);
 
-        io.to(socket.data.roomName).emit("receiveNewData", room.drawingData);
+        io.to(socket.data.roomName).emit("receiveNewData", {
+            drawingData: room.drawingData,
+            redoData: room.redoData
+        });
     });
 
     //Undo drawing
     socket.on("sendUndo", () => {
         const room = rooms.find(room => room.roomName === socket.data.roomName)!;
+
+        if(!room) return;
+
         const undoEl = room.drawingData.pop();
 
         if(!undoEl) return;
@@ -133,6 +141,9 @@ io.on("connection", socket => {
     //Redo drawing
     socket.on("sendRedo", () => {
         const room = rooms.find(room => room.roomName === socket.data.roomName)!;
+
+        if(!room) return;
+
         const redoEl = room.redoData.pop();
 
         if(!redoEl) return;
@@ -158,7 +169,7 @@ io.on("connection", socket => {
 
         io.to(sockets[0].data.roomName).emit("roomEvent", {
             clients: filterClients(updatedSockets),
-            user: socket.data.username,
+            user: userToKick.data.username,
             event: "kicked"
         });
 

@@ -1,5 +1,5 @@
-import { DrawingCanvas } from "./Components/DrawingCanvas"
-import { JoinPage } from "./Components/JoinPage"
+import { DrawingCanvas } from "./Components/DrawingCanvas/DrawingCanvas"
+import { JoinPage } from "./Components/JoinPage/JoinPage"
 import { clientDataCTX } from "./Context/ClientDataContext/clientDataCTX";
 import { useContext } from "react"
 

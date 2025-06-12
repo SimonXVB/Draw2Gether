@@ -1,14 +1,14 @@
 import { useContext, useEffect, useRef, useState } from "react"
-import { useRenderCanvas } from "../Hooks/useRenderCanvas";
-import { usePanCanvas } from "../Hooks/usePanCanvas";
-import { useZoomCanvas } from "../Hooks/useZoomCanvas";
-import { useDrawOnCanvas } from "../Hooks/useDrawOnCanvas";
-import { Toolbar } from "./Toolbar";
-import { MenuModal } from "./MenuModal";
-import { NotificationPopup } from "./Individuals/NotificationPopup";
-import { drawingCTX, type drawingInterface } from "../Context/DrawingContext/drawingCTX";
-import { clientDataCTX } from "../Context/ClientDataContext/clientDataCTX";
-import { socket } from "../socket";
+import { useRenderCanvas } from "../../Hooks/useRenderCanvas";
+import { usePanCanvas } from "../../Hooks/usePanCanvas";
+import { useZoomCanvas } from "../../Hooks/useZoomCanvas";
+import { useDrawOnCanvas } from "../../Hooks/useDrawOnCanvas";
+import { Toolbar } from "../Toolbar/Toolbar";
+import { MenuModal } from "../MenuModal/MenuModal";
+import { NotificationPopup } from "./Components/NotificationPopup";
+import { drawingCTX, type drawingInterface } from "../../Context/DrawingContext/drawingCTX";
+import { clientDataCTX } from "../../Context/ClientDataContext/clientDataCTX";
+import { socket } from "../../socket";
 
 export interface roomEventInterface {
     event: string,
@@ -38,8 +38,9 @@ export function DrawingCanvas() {
         });
     };
 
-    function setNewData(newDrawingInfo: drawingInterface[]) {
-        drawingDataRef.current = newDrawingInfo;
+    function setNewData(data: { drawingData: drawingInterface[], redoData: drawingInterface[] }) {
+        drawingDataRef.current = data.drawingData;
+        redoDataRef.current = data.redoData;
         render();
     };
 
@@ -52,7 +53,7 @@ export function DrawingCanvas() {
         });
     };
 
-    function setNewClients(data: { clients: [], user: string, event: string }) {
+    function updataRoom(data: { clients: [], user: string, event: string }) {
         setClientData(prev => {
             return {
                 ...prev,
@@ -106,7 +107,9 @@ export function DrawingCanvas() {
         };
 
         socket.on("receiveNewData", setNewData);
-        socket.on("roomEvent", setNewClients);
+        socket.on("receiveUndo", setNewData);
+        socket.on("receiveRedo", setNewData);
+        socket.on("roomEvent", updataRoom);
         socket.on("hostChange", setNewHost);
         socket.on("disconnect", roomDisconnect);
         socket.on("kickUserClient", kickUserClient);
@@ -115,7 +118,9 @@ export function DrawingCanvas() {
             initialEmitRef.current = false;
 
             socket.off("receiveNewData", setNewData);
-            socket.off("roomEvent", setNewClients);
+            socket.off("receiveUndo", setNewData);
+            socket.off("receiveRedo", setNewData);
+            socket.off("roomEvent", updataRoom);
             socket.off("hostChange", setNewHost);
             socket.off("disconnect", roomDisconnect);
             socket.off("kickUserClient", kickUserClient);
@@ -126,7 +131,7 @@ export function DrawingCanvas() {
     return (
         <>
             <Toolbar setMenuOpen={setMenuOpen}/>
-            <canvas ref={ref => {canvasRef.current = ref}} width={window.innerWidth} height={window.innerHeight} className="outline-2 outline-red-500"
+            <canvas ref={ref => {canvasRef.current = ref}} width={window.innerWidth} height={window.innerHeight} className="fixed outline-2 outline-red-400"
                 onMouseDown={e => {startMousePan(e); startDrawing(e)}}
                 onMouseMove={e => {mousePan(e); mouseDraw(e)}}
                 onMouseUp={() => {stopPan(); stopDrawing()}}
