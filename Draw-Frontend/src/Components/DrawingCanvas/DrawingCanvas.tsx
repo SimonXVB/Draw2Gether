@@ -18,9 +18,12 @@ export interface roomEventInterface {
 
 export function DrawingCanvas() {
     const initialEmitRef = useRef<boolean>(true);
+    const roomEvent = useRef<roomEventInterface>({
+        event: "",
+        user: ""
+    });
 
     const [menuOpen, setMenuOpen] = useState(false);
-    const [roomEvent, setRoomEvent] = useState<roomEventInterface>({} as roomEventInterface);
 
     const { drawingDataRef, redoDataRef, canvasRef } = useContext(drawingCTX);
     const { setClientData } = useContext(clientDataCTX);
@@ -63,10 +66,10 @@ export function DrawingCanvas() {
             }
         });
 
-        setRoomEvent({
+        roomEvent.current = {
             event: data.event,
             user: data.user
-        });
+        };
     };
 
     function roomDisconnect() {
@@ -133,7 +136,7 @@ export function DrawingCanvas() {
     return (
         <>
             <Toolbar setMenuOpen={setMenuOpen}/>
-            <canvas ref={ref => {canvasRef.current = ref}} width={window.innerWidth} height={window.innerHeight} tabIndex={1} className="fixed top-0 outline-2 outline-red-400"
+            <canvas ref={ref => {canvasRef.current = ref}} width={window.innerWidth} height={window.innerHeight} tabIndex={1} className="fixed bottom-0 outline-2 outline-red-400"
                 onMouseDown={e => {startMousePan(e); startDrawing(e)}}
                 onMouseMove={e => {mousePan(e); mouseDraw(e)}}
                 onMouseUp={() => {stopPan(); stopDrawing()}}
@@ -147,7 +150,7 @@ export function DrawingCanvas() {
                 onTouchEnd={() => {stopPan(); stopDrawing()}}
             ></canvas>
             <MenuModal setMenuOpen={setMenuOpen} menuOpen={menuOpen}/>
-            <NotificationPopup setRoomEvent={setRoomEvent} roomEvent={roomEvent}/>
+            <NotificationPopup roomEvent={roomEvent}/>
         </>
     )
 };
