@@ -2,6 +2,7 @@ import { useContext, type Dispatch, type SetStateAction } from "react"
 import { clientDataCTX } from "../../Context/ClientDataContext/clientDataCTX"
 import { drawingCTX } from "../../Context/DrawingContext/drawingCTX";
 import { useCanvasToImage } from "../../Hooks/useCanvasToImage";
+import { useRenderCanvas } from "../../Hooks/useRenderCanvas";
 import { socket } from "../../socket";
 
 export function MenuModal({ setMenuOpen, menuOpen }: { setMenuOpen: Dispatch<SetStateAction<boolean>>, menuOpen: boolean }) {
@@ -9,6 +10,7 @@ export function MenuModal({ setMenuOpen, menuOpen }: { setMenuOpen: Dispatch<Set
     const { drawingDataRef, redoDataRef } = useContext(drawingCTX);
 
     const { canvasToImage } = useCanvasToImage();
+    const { render } = useRenderCanvas();
 
     function leaveRoom() {
         drawingDataRef.current = [];
@@ -32,10 +34,17 @@ export function MenuModal({ setMenuOpen, menuOpen }: { setMenuOpen: Dispatch<Set
         socket.emit("kickUserHost", userToKickID);
     };
 
+    function closeMenu(e: React.MouseEvent<HTMLDivElement>) {
+        if(e.target === e.currentTarget) {
+            setMenuOpen(false);
+            render();
+        };
+    };
+
     return (
         <>
         {menuOpen &&
-            <div className="fixed top-0 left-0 z-20 flex justify-center items-center w-screen h-screen bg-gray-400/50" onClick={(e) => e.target === e.currentTarget && setMenuOpen(false)}>
+            <div className="fixed top-0 left-0 z-20 flex justify-center items-center w-screen h-screen bg-gray-400/50" onClick={closeMenu}>
                 <div className="bg-white max-h-[80vh] max-w-[500px] p-6 mx-2 rounded-xl overflow-auto shadow-lg shadow-gray-500">
                     <h1 className="text-4xl font-black text-center mb-4">
                         <span className="text-blue-400">Draw</span>

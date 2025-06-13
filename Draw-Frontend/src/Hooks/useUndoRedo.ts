@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { drawingCTX } from "../Context/DrawingContext/drawingCTX";
 import { useRenderCanvas } from "./useRenderCanvas";
+import { socket } from "../socket";
 
 export function useUndoRedo() {
     const { drawingDataRef, redoDataRef } = useContext(drawingCTX);
@@ -12,6 +13,8 @@ export function useUndoRedo() {
 
         redoDataRef.current.push(undoEl);
         render();
+
+        socket.emit("sendUndo");
     };
 
     function redo() {
@@ -20,7 +23,21 @@ export function useUndoRedo() {
         
         drawingDataRef.current.push(redoEl);
         render();
+
+        socket.emit("sendRedo");
     };
 
-    return { undo, redo };
+    function keyboardUndo(e: React.KeyboardEvent<HTMLCanvasElement>) {
+        if(e.ctrlKey && e.key === "z") {
+            undo();
+        };
+    };
+
+    function keyboardRedo(e: React.KeyboardEvent<HTMLCanvasElement>) {
+        if(e.ctrlKey && e.key === "y") {
+            redo();
+        };
+    };
+
+    return { undo, redo, keyboardUndo, keyboardRedo };
 };

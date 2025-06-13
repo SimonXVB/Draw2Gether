@@ -90,17 +90,20 @@ export function JoinPage() {
             </h1>
             <div>
                 <form onSubmit={e => activeTab === "join" ? joinRoom(e, "joinRoom") : joinRoom(e, "createRoom")} className={`mb-4 text-white font-bold rounded-md p-10 transition-all duration-300 shadow-xl shadow-gray-400 ${activeTab === "join" ? "bg-blue-400" : "bg-red-400"}`}>
-                    <div className="mb-8">
+                    <div className="mb-6">
                         <div className="text-2xl">Username</div>
                         <input onChange={e => setUsernameInput(e.target.value)} defaultValue={usernameInput} className="px-1 border-2 border-white rounded-md"/>
+                        <div className="text-xs text-right">{usernameInput.length}/25</div>
                     </div>
-                    <div className="mb-2">
+                    <div className="-mb-2">
                         <div>Room Name</div>
                         <input onChange={e => setRoomInput(e.target.value)} className="px-1 border-2 border-white rounded-md"/>
+                        <div className="text-xs text-right">{roomInput.length}/25</div>
                     </div>
                     <div>
                         <div>Password</div>
                         <input onChange={e => setPasswordInput(e.target.value)} className="px-1 border-2 border-white rounded-md"/>
+                        <div className="text-xs text-right">{passwordInput.length}/25</div>
                     </div>
                     <button type="submit" className={`mt-4 font-black w-full rounded-md py-1 bg-white cursor-pointer hover:bg-gray-100 hover:scale-110 transition-all duration-300 ${activeTab === "join" ? "text-blue-400" : "text-red-400"}`}>{activeTab === "join" ? "Join Room" : "Create Room"}</button>
                 </form>
@@ -109,6 +112,7 @@ export function JoinPage() {
                     {error === "password" && "Incorrect Password"}
                     {error === "roomNotExists" && "A room with this name doesn't exist."}
                     {error === "roomExists" && "A room with this name already exists."}
+                    {error === "length" && "Exceeded character limit"}
                 </div>
             </div>
             <div className="flex items-center gap-4">

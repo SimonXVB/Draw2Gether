@@ -18,6 +18,11 @@ io.on("connection", socket => {
             return;
         };
 
+        if(input.roomName.length > 25 || input.password.length > 25 || input.username.length > 25) {
+            io.to(socket.id).emit("joinError", "length");
+            return;
+        };
+
         const sockets = await io.in(input.roomName).fetchSockets();
 
         if(!sockets[0]) {
@@ -54,6 +59,11 @@ io.on("connection", socket => {
     socket.on("joinRoom", async (input: joinRoomInterface) => {
         if(input.roomName === "" || input.password === "" || input.username === "") {
             io.to(socket.id).emit("joinError", "empty");
+            return;
+        };
+
+        if(input.roomName.length > 25 || input.password.length > 25 || input.username.length > 25) {
+            io.to(socket.id).emit("joinError", "length");
             return;
         };
 
@@ -96,11 +106,7 @@ io.on("connection", socket => {
     //Get initial data
     socket.on("getInitialData", cb => {
         const room = rooms.find(room => room.roomName === socket.data.roomName)!;
-
-        if(!room) {
-            io.to(socket.id).emit("joinError", "roomNotExists");
-            return;
-        };
+        if(!room) return;
 
         cb({
             drawingData: room.drawingData,
@@ -124,7 +130,6 @@ io.on("connection", socket => {
     //Undo drawing
     socket.on("sendUndo", () => {
         const room = rooms.find(room => room.roomName === socket.data.roomName)!;
-
         if(!room) return;
 
         const undoEl = room.drawingData.pop();
@@ -141,7 +146,6 @@ io.on("connection", socket => {
     //Redo drawing
     socket.on("sendRedo", () => {
         const room = rooms.find(room => room.roomName === socket.data.roomName)!;
-
         if(!room) return;
 
         const redoEl = room.redoData.pop();

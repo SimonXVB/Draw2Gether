@@ -3,6 +3,7 @@ import { useRenderCanvas } from "../../Hooks/useRenderCanvas";
 import { usePanCanvas } from "../../Hooks/usePanCanvas";
 import { useZoomCanvas } from "../../Hooks/useZoomCanvas";
 import { useDrawOnCanvas } from "../../Hooks/useDrawOnCanvas";
+import { useUndoRedo } from "../../Hooks/useUndoRedo";
 import { Toolbar } from "../Toolbar/Toolbar";
 import { MenuModal } from "../MenuModal/MenuModal";
 import { NotificationPopup } from "./Components/NotificationPopup";
@@ -28,6 +29,7 @@ export function DrawingCanvas() {
     const { startMousePan, startTouchPan, mousePan, touchPan, stopPan } = usePanCanvas();
     const { mouseZoom, startTouchZoom, touchZoom } = useZoomCanvas();
     const { startDrawing, mouseDraw, touchDraw, stopDrawing } = useDrawOnCanvas();
+    const { keyboardUndo, keyboardRedo } = useUndoRedo();
 
     //Socket.io functions
     function getInitialData() {
@@ -131,12 +133,14 @@ export function DrawingCanvas() {
     return (
         <>
             <Toolbar setMenuOpen={setMenuOpen}/>
-            <canvas ref={ref => {canvasRef.current = ref}} width={window.innerWidth} height={window.innerHeight} className="fixed outline-2 outline-red-400"
+            <canvas ref={ref => {canvasRef.current = ref}} width={window.innerWidth} height={window.innerHeight} tabIndex={1} className="fixed outline-2 outline-red-400"
                 onMouseDown={e => {startMousePan(e); startDrawing(e)}}
                 onMouseMove={e => {mousePan(e); mouseDraw(e)}}
                 onMouseUp={() => {stopPan(); stopDrawing()}}
                 onMouseLeave={() => {stopPan(); stopDrawing()}}
                 onWheel={e => mouseZoom(e)}
+
+                onKeyDown={e => {if(!menuOpen) {keyboardUndo(e); keyboardRedo(e)}}}
 
                 onTouchStart={e => {startTouchPan(e); startTouchZoom(e); startDrawing(e)}}
                 onTouchMove={e => {touchPan(e); touchZoom(e); touchDraw(e)}}
