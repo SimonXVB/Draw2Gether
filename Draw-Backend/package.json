@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "server": "nodemon -r dotenv/config server.ts"
+    "dev": "nodemon -r dotenv/config server.ts",
+    "build": "tsc",
+    "server": "node --env-file=.env dist/server.js"
   },
   "author": "",
   "license": "MIT",
