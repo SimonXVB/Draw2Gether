@@ -1,12 +1,9 @@
 import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import { type roomEventInterface } from "../DrawingCanvas";
-import { useRenderCanvas } from "../../../Hooks/useRenderCanvas";
 
 export function NotificationPopup({ setRoomEvent, roomEvent } : { setRoomEvent: Dispatch<SetStateAction<roomEventInterface>>, roomEvent: roomEventInterface}) {
     const timeoutRef = useRef<number>(0);
     const notiRef = useRef<HTMLDivElement>(null);
-
-    const { render } = useRenderCanvas();
 
     useEffect(() => {
         if(notiRef.current) {
@@ -19,7 +16,6 @@ export function NotificationPopup({ setRoomEvent, roomEvent } : { setRoomEvent: 
 
                     notiRef.current!.ontransitionend = () => {
                         setRoomEvent({} as roomEventInterface);
-                        render();
                     };
                 } else {
                     setRoomEvent({} as roomEventInterface);
@@ -32,7 +28,7 @@ export function NotificationPopup({ setRoomEvent, roomEvent } : { setRoomEvent: 
     return (
         <>
             {roomEvent.event &&
-                <div ref={notiRef} className="fixed bottom-0 -left-full font-bold bg-red-400 px-2 py-1 rounded-tr-md text-white transition-all duration-300">
+                <div ref={notiRef} className="absolute bottom-0 -left-full z-10 font-bold bg-red-400 px-2 py-1 rounded-tr-md text-white transition-all duration-300">
                     {roomEvent.event === "joined" && <div>{roomEvent.user} has joined the room!</div>}
                     {roomEvent.event === "left" && <div>{roomEvent.user} has left the room!</div>}
                     {roomEvent.event === "kicked" && <div>{roomEvent.user} has been kicked!</div>}

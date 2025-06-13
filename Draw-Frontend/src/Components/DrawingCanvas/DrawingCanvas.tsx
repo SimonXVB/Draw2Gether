@@ -133,7 +133,7 @@ export function DrawingCanvas() {
     return (
         <>
             <Toolbar setMenuOpen={setMenuOpen}/>
-            <canvas ref={ref => {canvasRef.current = ref}} width={window.innerWidth} height={window.innerHeight} tabIndex={1} className="fixed outline-2 outline-red-400"
+            <canvas ref={ref => {canvasRef.current = ref}} width={window.innerWidth} height={window.innerHeight} tabIndex={1} className="fixed top-0 outline-2 outline-red-400"
                 onMouseDown={e => {startMousePan(e); startDrawing(e)}}
                 onMouseMove={e => {mousePan(e); mouseDraw(e)}}
                 onMouseUp={() => {stopPan(); stopDrawing()}}
