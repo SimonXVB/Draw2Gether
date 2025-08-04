@@ -13,6 +13,8 @@ export function useDrawOnCanvas() {
     let currentDrawingInfo: drawingInterface = {} as drawingInterface;
 
     function startDrawing(e: React.MouseEvent | React.TouchEvent) {
+        e.preventDefault();
+
         if((e as React.MouseEvent).button === 0 || (e as React.TouchEvent).touches && (e as React.TouchEvent).touches.length === 1) {
             isDrawing = true;
             currentDrawingInfo = {
@@ -24,6 +26,8 @@ export function useDrawOnCanvas() {
     };
 
     function mouseDraw(e: React.MouseEvent<HTMLCanvasElement>) {
+        e.preventDefault();
+
         if(isDrawing && e.button === 0) {
             const ctx = canvasRef.current!.getContext("2d")!;
 
@@ -52,6 +56,8 @@ export function useDrawOnCanvas() {
     };
 
     function touchDraw(e: React.TouchEvent<HTMLCanvasElement>) {
+        e.preventDefault();
+
         if(isDrawing && e.touches.length === 1) {
             const ctx = canvasRef.current!.getContext("2d")!;
 
