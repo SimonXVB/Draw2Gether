@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { clientDataCTX } from "../../Context/ClientDataContext/clientDataCTX";
-import { JoinPageErrorPopup } from "./Components/JoinPageErrorPopup";
+import { JoinPageNotification } from "./Components/JoinPageNotification";
 import { socket } from "../../socket";
 
 export function JoinPage() {
@@ -11,7 +11,7 @@ export function JoinPage() {
     const [usernameInput, setUsernameInput] = useState<string>(clientData.username);
     const [roomInput, setRoomInput] = useState<string>("");
     const [passwordInput, setPasswordInput] = useState<string>("");
-    const [error, setError] = useState<string>("");
+    const [status, setStatus] = useState<string>("");
     const [activeTab, setActiveTab] = useState<"join" | "create">("join");
 
     function joinRoom(e: React.FormEvent<HTMLFormElement>, type: "joinRoom" | "createRoom") {
@@ -22,9 +22,13 @@ export function JoinPage() {
             password: passwordInput,
             username: usernameInput
         });
+
+        setStatus("connecting");
     };
 
     function setClientJoinedData(data: { roomName: string, username: string, password: string, isHost: boolean, clients: [] }) {
+        setStatus("");
+
         setClientData(prev => ({
             ...prev,
             isJoined: true,
@@ -38,10 +42,10 @@ export function JoinPage() {
 
     function setJoinError(error: string) {
         clearTimeout(errorTimeoutRef.current);
-        setError(error);
+        setStatus(error);
 
         errorTimeoutRef.current = setTimeout(() => {
-            setError("");
+            setStatus("");
         }, 5000);
     };
 
@@ -49,7 +53,8 @@ export function JoinPage() {
         setClientData(prev => {
             return {
                 ...prev,
-                isDisconnected: true
+                isDisconnected: true,
+                isConnecting: false
             }
         });
     };
@@ -58,7 +63,8 @@ export function JoinPage() {
         setClientData(prev => {
             return {
                 ...prev,
-                isDisconnected: false
+                isDisconnected: false,
+                isConnecting: false
             }
         });
     };
@@ -107,12 +113,13 @@ export function JoinPage() {
                     </div>
                     <button type="submit" className={`mt-4 font-black w-full rounded-md py-1 bg-white cursor-pointer hover:bg-gray-100 hover:scale-110 transition-all duration-300 ${activeTab === "join" ? "text-blue-400" : "text-red-400"}`}>{activeTab === "join" ? "Join Room" : "Create Room"}</button>
                 </form>
-                <div className={`${error ? "opacity-100" : "opacity-0"} text-center font-black text-red-400 h-6`}>
-                    {error === "empty" && "One or more fields are empty."}
-                    {error === "password" && "Incorrect Password"}
-                    {error === "roomNotExists" && "A room with this name doesn't exist."}
-                    {error === "roomExists" && "A room with this name already exists."}
-                    {error === "length" && "Exceeded character limit"}
+                <div className={`${status ? "opacity-100" : "opacity-0"} text-center font-black text-red-400 h-6`}>
+                    {status === "empty" && "One or more fields are empty."}
+                    {status === "password" && "Incorrect Password"}
+                    {status === "roomNotExists" && "A room with this name doesn't exist."}
+                    {status === "roomExists" && "A room with this name already exists."}
+                    {status === "length" && "Exceeded character limit"}
+                    {status === "connecting" && "Connecting..."}
                 </div>
             </div>
             <div className="flex items-center gap-4">
@@ -125,7 +132,7 @@ export function JoinPage() {
                 </div>
                 <h1 className={`text-2xl font-black transition-all duration-300 ${activeTab === "create" && "scale-125 text-red-400"}`}>Create</h1>
             </div>
-            <JoinPageErrorPopup/>
+            <JoinPageNotification/>
         </div>
     );
 };
