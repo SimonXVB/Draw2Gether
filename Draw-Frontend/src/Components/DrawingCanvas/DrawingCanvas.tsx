@@ -106,10 +106,15 @@ export function DrawingCanvas() {
         });
     };
 
+    function updateCanvasSize() {
+        console.log("resize")
+
+        canvasRef.current!.width = window.innerWidth;
+        canvasRef.current!.height = window.innerHeight;
+    };
+
     useEffect(() => {  
-        if(initialEmitRef.current === true) {
-            getInitialData();
-        };
+        if(initialEmitRef.current === true) {getInitialData()};
 
         socket.on("receiveNewData", setNewData);
         socket.on("receiveUndo", setNewData);
@@ -118,6 +123,8 @@ export function DrawingCanvas() {
         socket.on("hostChange", setNewHost);
         socket.on("disconnect", roomDisconnect);
         socket.on("kickUserClient", kickUserClient);
+
+        window.addEventListener("resize", updateCanvasSize);
 
         return () => {
             initialEmitRef.current = false;
@@ -129,6 +136,8 @@ export function DrawingCanvas() {
             socket.off("hostChange", setNewHost);
             socket.off("disconnect", roomDisconnect);
             socket.off("kickUserClient", kickUserClient);
+
+            window.removeEventListener("resize", updateCanvasSize);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
