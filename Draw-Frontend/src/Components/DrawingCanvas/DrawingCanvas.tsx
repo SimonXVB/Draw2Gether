@@ -4,12 +4,12 @@ import { usePanCanvas } from "../../Hooks/usePanCanvas";
 import { useZoomCanvas } from "../../Hooks/useZoomCanvas";
 import { useDrawOnCanvas } from "../../Hooks/useDrawOnCanvas";
 import { useUndoRedo } from "../../Hooks/useUndoRedo";
-import { Toolbar } from "../Toolbar/Toolbar";
-import { MenuModal } from "../MenuModal/MenuModal";
-import { NotificationPopup } from "./Components/NotificationPopup";
 import { drawingCTX, type drawingInterface } from "../../Context/DrawingContext/drawingCTX";
 import { clientDataCTX } from "../../Context/ClientDataContext/clientDataCTX";
 import { socket } from "../../socket";
+import { Toolbar } from "./Toolbar/Toolbar";
+import { MenuModal } from "./MenuModal/MenuModal";
+import { NotificationPopup } from "./NotificationPopup";
 
 export interface roomEventInterface {
     event: string,
@@ -107,8 +107,6 @@ export function DrawingCanvas() {
     };
 
     function updateCanvasSize() {
-        console.log("resize")
-
         canvasRef.current!.width = window.innerWidth;
         canvasRef.current!.height = window.innerHeight;
     };
@@ -139,7 +137,7 @@ export function DrawingCanvas() {
 
             window.removeEventListener("resize", updateCanvasSize);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

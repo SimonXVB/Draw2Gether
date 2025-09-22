@@ -1,9 +1,9 @@
 import { useContext, type Dispatch, type SetStateAction } from "react"
-import { clientDataCTX } from "../../Context/ClientDataContext/clientDataCTX"
-import { drawingCTX } from "../../Context/DrawingContext/drawingCTX";
-import { useCanvasToImage } from "../../Hooks/useCanvasToImage";
-import { useRenderCanvas } from "../../Hooks/useRenderCanvas";
-import { socket } from "../../socket";
+import { clientDataCTX } from "../../../Context/ClientDataContext/clientDataCTX";
+import { drawingCTX } from "../../../Context/DrawingContext/drawingCTX";
+import { useCanvasToImage } from "../../../Hooks/useCanvasToImage";
+import { useRenderCanvas } from "../../../Hooks/useRenderCanvas";
+import { socket } from "../../../socket";
 
 export function MenuModal({ setMenuOpen, menuOpen }: { setMenuOpen: Dispatch<SetStateAction<boolean>>, menuOpen: boolean }) {
     const { setClientData, clientData } = useContext(clientDataCTX);

@@ -81,7 +81,7 @@ export function JoinPage() {
             socket.off("connect_error", joinPageDisconnect);
             socket.off("connect", joinPageConnect);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

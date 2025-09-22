@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { type roomEventInterface } from "../DrawingCanvas";
+import { type roomEventInterface } from "./DrawingCanvas";
 
 export function NotificationPopup({ roomEvent } :  {roomEvent: React.RefObject<roomEventInterface>}) {
     const timeoutRef = useRef<number>(0);

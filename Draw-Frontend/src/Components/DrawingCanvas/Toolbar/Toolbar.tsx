@@ -1,8 +1,8 @@
 import { useContext, useState, type Dispatch, type SetStateAction } from "react"
-import { globalSettingsCTX } from "../../Context/GlobalSettingsContext/globalSettingsCTX"
-import { useUndoRedo } from "../../Hooks/useUndoRedo";
-import { useRenderCanvas } from "../../Hooks/useRenderCanvas";
-import { transformCTX } from "../../Context/TransformContext/transformCTX";
+import { globalSettingsCTX } from "../../../Context/GlobalSettingsContext/globalSettingsCTX";
+import { useUndoRedo } from "../../../Hooks/useUndoRedo";
+import { useRenderCanvas } from "../../../Hooks/useRenderCanvas";
+import { transformCTX } from "../../../Context/TransformContext/transformCTX";
 import { ToolbarButton } from "./Components/ToolbarButton";
 import { ToolbarDivider } from "./Components/ToolbarDivder";
 
